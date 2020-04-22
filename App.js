@@ -2,27 +2,76 @@ import React from 'react';
 import MapView, { Polygon } from 'react-native-maps';
 import { StyleSheet, Text, View, Dimensions } from 'react-native';
 
-// Import the U.S. Census Bureau's Cartographic Boundary File of counties.
-// Source: https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html
-import counties from './assets/cb_2018_us_county_20m.json'
+// Import:
+// - EpiView parsing functions.
+// - U.S. Census Bureau's Cartographic Boundary File for counties.
+//   Source: https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html
+// - COVID-19 case data by county from The New York Times.
+import { parseCounts, parseBounds } from './epiview.js';
+import countyBounds from './assets/cb_2018_us_county_20m.json'
+const nytCounts = 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv';
 
 export default class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
+  async componentDidMount() {
+    // Helper function: Scales the number of cases using a custom function.
+    function scale(x) {
+      return 0.6 * (1 - Math.pow(Math.E, -(x / 1000)));
+    }
+    // Retrieve and parse counts and bounds by county.
+    const counts = await fetch(nytCounts).then(res => res.text()).then(parseCounts);
+    const bounds = parseBounds(countyBounds);
+    // Construct polygons.
+    let polygons = [];
+    for (const [fips, coordsets] of Object.entries(bounds)) {
+      if (fips in counts) {
+        for (const [i, coords] of coordsets.entries()) {
+          // Get the most recent row.
+          const rowObj = Object.entries(counts[fips]).reduce(
+            ([k1, v1], [k2, v2]) => k1 > k2 ? [k1, v1] : [k2, v2])[1];
+          const msg = `${rowObj.cases} cases, ${rowObj.deaths} deaths\n` +
+                      `${coordsets.name}`;
+          polygons.push(<Polygon coordinates={coords}
+            key={coordsets.name + `\n${fips}-${i}`}
+            strokeWidth={0}
+            fillColor={`rgba(255, 0, 0, ${scale(rowObj.cases)})`}
+            tappable={true}
+            onPress={() => alert(msg)} />);
+        }
+      }
+    }
+    this.setState({polygons});
+  }
+
   render() {
-    const initialRegion = {
+    const california = {
       latitude: 36.7783,
       longitude: -119.4179,
-      latitudeDelta: 15.0,
-      longitudeDelta: 15.0,
+      latitudeDelta: 12.0,
+      longitudeDelta: 12.0,
     };
-    return (
-      <View style={styles.container}>
-        <MapView style={styles.mapStyle} initialRegion={initialRegion}>
-          {toPolygons(counties)}
-        </MapView>
-      </View>
-    );
+    if (this.state.polygons) {
+      return (
+        <View style={styles.container}>
+          <MapView style={styles.mapStyle} initialRegion={california}>
+            {this.state.polygons}
+          </MapView>
+        </View>
+      );
+    }
+    else {
+      return (
+        <View style={styles.container}>
+          <Text>Downloading data...</Text>
+        </View>
+      );
+    }
   }
-}
+}1
 
 const styles = StyleSheet.create({
   container: {
@@ -36,104 +85,3 @@ const styles = StyleSheet.create({
     height: Dimensions.get('window').height,
   },
 });
-
-/**
- * Converts a GeoJSON FeatureCollection to an array of React Native Polygons.
- *
- * @param {!FeatureCollection} fc A GeoJSON FeatureCollection.
- * @return {!Array<Polygon>} React Native Polygons.
- */
-function toPolygons(fc) {
-  // Helper function: Converts a GeoJSON coordinate to a LatLng.
-  function toLatLng(coord) {
-    return {latitude: coord[1], longitude: coord[0]};
-  }
-  // Helper function: Converts an array of GeoJSON coordinates to a Polygon
-  // with the specified key.
-  function toPolygon(coords, key) {
-    return <Polygon coordinates={coords.map(toLatLng)}
-                    key={key}
-                    strokeColor='#ee6e73'
-                    fillColor='rgba(255, 0, 0, 0.1)'
-                    tappable={true}
-                    onPress={() => alert(key)} />;
-  }
-  // Loop through the FeatureCollection.
-  let polygons = []
-  for (const feat of fc.features) {
-    switch (feat.geometry.type) {
-      case 'Polygon':
-        const component = feat.geometry.coordinates;
-        polygons.push(toPolygon(component[0],
-          feat.properties.NAME + ', ' + STATEFP[feat.properties.STATEFP] +
-          ` (GeoID: ${feat.properties.GEOID})`));
-        break;
-      case 'MultiPolygon':
-        for (const [i, component] of feat.geometry.coordinates.entries()) {
-          polygons.push(toPolygon(component[0],
-            feat.properties.NAME + ', ' + STATEFP[feat.properties.STATEFP] +
-            ` (GeoID: ${feat.properties.GEOID}-${i})`));
-        }
-        break;
-    }
-  }
-  return polygons;
-}
-
-const STATEFP = {
-  '01': 'AL',
-  '02': 'AK',
-  '04': 'AZ',
-  '05': 'AR',
-  '06': 'CA',
-  '08': 'CO',
-  '09': 'CT',
-  '10': 'DE',
-  '12': 'FL',
-  '13': 'GA',
-  '15': 'HI',
-  '16': 'ID',
-  '17': 'IL',
-  '18': 'IN',
-  '19': 'IA',
-  '20': 'KS',
-  '21': 'KY',
-  '22': 'LA',
-  '23': 'ME',
-  '24': 'MD',
-  '25': 'MA',
-  '26': 'MI',
-  '27': 'MN',
-  '28': 'MS',
-  '29': 'MO',
-  '30': 'MT',
-  '31': 'NE',
-  '32': 'NV',
-  '33': 'NH',
-  '34': 'NJ',
-  '35': 'NM',
-  '36': 'NY',
-  '37': 'NC',
-  '38': 'ND',
-  '39': 'OH',
-  '40': 'OK',
-  '41': 'OR',
-  '42': 'PA',
-  '44': 'RI',
-  '45': 'SC',
-  '46': 'SD',
-  '47': 'TN',
-  '48': 'TX',
-  '49': 'UT',
-  '50': 'VT',
-  '51': 'VA',
-  '53': 'WA',
-  '54': 'WV',
-  '55': 'WI',
-  '56': 'WY',
-  '60': 'AS',
-  '66': 'GU',
-  '69': 'MP',
-  '72': 'PR',
-  '78': 'VI',
-};
