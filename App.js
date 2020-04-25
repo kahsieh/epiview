@@ -37,8 +37,10 @@ export default class App extends React.Component {
         // Get the most recent row.
         const rowObj = Object.entries(rowgroup).reduce(
           ([k1, v1], [k2, v2]) => k1 > k2 ? [k1, v1] : [k2, v2])[1];
-        const val = rowObj[this.state.numerator];
-        maxval = Math.max(maxval, val);
+        const num = rowObj[this.state.numerator];
+        const den = this.state.denominator == 'total' ? 1 :
+                    rowObj[this.state.denominator];
+        maxval = Math.max(maxval, num / den);
       }
 
       // Create a helper function for scaling.
@@ -54,7 +56,10 @@ export default class App extends React.Component {
             // Get the most recent row.
             const rowObj = Object.entries(this.state.counts[fips]).reduce(
               ([k1, v1], [k2, v2]) => k1 > k2 ? [k1, v1] : [k2, v2])[1];
-            const alpha = scale(rowObj[this.state.numerator]);
+            const num = rowObj[this.state.numerator];
+            const den = this.state.denominator == 'total' ? 1 :
+                        rowObj[this.state.denominator];
+            const alpha = scale(num / den);
             const msg = `${rowObj.cases} cases, ${rowObj.deaths} deaths\n` +
                         `${coordsets.name}`;
             polygons.push(<Polygon coordinates={coords}
@@ -91,7 +96,7 @@ export default class App extends React.Component {
                     onValueChange={(value, index) =>
                                      this.setState({denominator: value})}>
               <Picker.Item label="Total" value="total" />
-              <Picker.Item label="Per million population" value="pmp" />
+              <Picker.Item label="Per case" value="cases" />
             </Picker>
           </View>
         </View>
