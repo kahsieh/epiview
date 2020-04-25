@@ -1,6 +1,6 @@
 import React from 'react';
 import MapView, { Polygon } from 'react-native-maps';
-import { StyleSheet, Text, View, Dimensions } from 'react-native';
+import { Picker, StyleSheet, Text, View, Dimensions } from 'react-native';
 
 // Import:
 // - EpiView parsing functions.
@@ -14,7 +14,10 @@ const nytCounts = 'https://raw.githubusercontent.com/nytimes/covid-19-data/maste
 export default class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      numerator: 'cases',
+      denominator: 'total',
+    };
   }
 
   async componentDidMount() {
@@ -60,6 +63,22 @@ export default class App extends React.Component {
           <MapView style={styles.mapStyle} initialRegion={california}>
             {this.state.polygons}
           </MapView>
+          <View style={styles.toolbar}>
+            <Picker selectedValue={this.state.numerator}
+                    style={{ width: 150 }}
+                    onValueChange={(value, index) =>
+                                     this.setState({numerator: value})}>
+              <Picker.Item label="Cases" value="cases" />
+              <Picker.Item label="Deaths" value="deaths" />
+            </Picker>
+            <Picker selectedValue={this.state.denominator}
+                    style={{ width: 200 }}
+                    onValueChange={(value, index) =>
+                                     this.setState({denominator: value})}>
+              <Picker.Item label="Total" value="total" />
+              <Picker.Item label="Per million population" value="pmp" />
+            </Picker>
+          </View>
         </View>
       );
     }
@@ -76,12 +95,18 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#eeeeee',
     alignItems: 'center',
     justifyContent: 'center',
   },
   mapStyle: {
     width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height,
+    height: Dimensions.get('window').height - 100,
+  },
+  toolbar: {
+    flexDirection: 'row',
+    height: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
