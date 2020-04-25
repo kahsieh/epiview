@@ -15,53 +15,68 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      bounds: parseBounds(countyBounds),
+      counts: null,
       numerator: 'cases',
       denominator: 'total',
     };
   }
 
-  async componentDidMount() {
-    // Helper function: Scales the number of cases using a custom function.
-    function scale(x) {
-      return 0.6 * (1 - Math.pow(Math.E, -(x / 1000)));
-    }
-    // Retrieve and parse counts and bounds by county.
-    const counts = await fetch(nytCounts).then(res => res.text()).then(parseCounts);
-    const bounds = parseBounds(countyBounds);
-    // Construct polygons.
-    let polygons = [];
-    for (const [fips, coordsets] of Object.entries(bounds)) {
-      if (fips in counts) {
-        for (const [i, coords] of coordsets.entries()) {
-          // Get the most recent row.
-          const rowObj = Object.entries(counts[fips]).reduce(
-            ([k1, v1], [k2, v2]) => k1 > k2 ? [k1, v1] : [k2, v2])[1];
-          const msg = `${rowObj.cases} cases, ${rowObj.deaths} deaths\n` +
-                      `${coordsets.name}`;
-          polygons.push(<Polygon coordinates={coords}
-            key={coordsets.name + `\n${fips}-${i}`}
-            strokeWidth={0}
-            fillColor={`rgba(255, 0, 0, ${scale(rowObj.cases)})`}
-            tappable={true}
-            onPress={() => alert(msg)} />);
-        }
-      }
-    }
-    this.setState({polygons});
+  componentDidMount() {
+    fetch(nytCounts)
+    .then(res => res.text())
+    .then(parseCounts)
+    .then(counts => this.setState({counts}));
   }
 
   render() {
-    const california = {
-      latitude: 36.7783,
-      longitude: -119.4179,
-      latitudeDelta: 12.0,
-      longitudeDelta: 12.0,
-    };
-    if (this.state.polygons) {
+    if (this.state.counts) {
+      // Find the scaling constant.
+      let maxval = 0;
+      for (const rowgroup of Object.values(this.state.counts)) {
+        // Get the most recent row.
+        const rowObj = Object.entries(rowgroup).reduce(
+          ([k1, v1], [k2, v2]) => k1 > k2 ? [k1, v1] : [k2, v2])[1];
+        const val = rowObj[this.state.numerator];
+        maxval = Math.max(maxval, val);
+      }
+
+      // Create a helper function for scaling.
+      function scale(x) {
+        return 0.6 * (1 - Math.pow(Math.E, -10 * (x / maxval)));
+      }
+
+      // Construct polygons.
+      let polygons = [];
+      for (const [fips, coordsets] of Object.entries(this.state.bounds)) {
+        if (fips in this.state.counts) {
+          for (const [i, coords] of coordsets.entries()) {
+            // Get the most recent row.
+            const rowObj = Object.entries(this.state.counts[fips]).reduce(
+              ([k1, v1], [k2, v2]) => k1 > k2 ? [k1, v1] : [k2, v2])[1];
+            const alpha = scale(rowObj[this.state.numerator]);
+            const msg = `${rowObj.cases} cases, ${rowObj.deaths} deaths\n` +
+                        `${coordsets.name}`;
+            polygons.push(<Polygon coordinates={coords}
+              key={coordsets.name + `\n${fips}-${i}`}
+              strokeWidth={0}
+              fillColor={`rgba(255, 0, 0, ${alpha})`}
+              tappable={true}
+              onPress={() => alert(msg)} />);
+          }
+        }
+      }
+
+      const california = {
+        latitude: 36.7783,
+        longitude: -119.4179,
+        latitudeDelta: 12.0,
+        longitudeDelta: 12.0,
+      };
       return (
         <View style={styles.container}>
           <MapView style={styles.mapStyle} initialRegion={california}>
-            {this.state.polygons}
+            {polygons}
           </MapView>
           <View style={styles.toolbar}>
             <Picker selectedValue={this.state.numerator}
@@ -101,11 +116,11 @@ const styles = StyleSheet.create({
   },
   mapStyle: {
     width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height - 100,
+    height: Dimensions.get('window').height - 75,
   },
   toolbar: {
     flexDirection: 'row',
-    height: 100,
+    height: 75,
     alignItems: 'center',
     justifyContent: 'center',
   },
