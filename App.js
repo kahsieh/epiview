@@ -1,74 +1,84 @@
 import React from 'react';
 import MapView, { Polygon } from 'react-native-maps';
 import { Picker, StyleSheet, Text, View, Dimensions } from 'react-native';
-
-// Import:
-// - EpiView parsing functions.
-// - U.S. Census Bureau's Cartographic Boundary File for counties.
-//   Source: https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html
-// - COVID-19 case data by county from The New York Times.
-import { parseCounts, parseBounds } from './epiview.js';
-import countyBounds from './assets/cb_2018_us_county_20m.json'
-const nytCounts = 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv';
+import { compileData } from './epiview.js';
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      bounds: parseBounds(countyBounds),
-      counts: null,
+      data: null,
       numerator: 'cases',
       denominator: 'total',
     };
   }
 
   componentDidMount() {
-    fetch(nytCounts)
-    .then(res => res.text())
-    .then(parseCounts)
-    .then(counts => this.setState({counts}));
+    compileData().then(data => this.setState({ data }));
+  }
+
+  /**
+   * Executes the user-defined function on a county.
+   *
+   * @param {!Object<string, *>} county Data table entry for a county.
+   */
+  f(county) {
+    if (!('latestCounts' in county)) {
+      return 0;
+    }
+    let num, den;
+    switch (this.state.numerator) {
+      case 'cases':
+        num = county.latestCounts.cases;
+        break;
+      case 'deaths':
+        num = county.latestCounts.deaths;
+        break;
+    }
+    switch (this.state.denominator) {
+      case 'total':
+        den = 1;
+        break;
+      case 'cases':
+        den = county.latestCounts.cases;
+        break;
+    }
+    return num / den;
   }
 
   render() {
-    if (this.state.counts) {
-      // Find the scaling constant.
-      let maxval = 0;
-      for (const rowgroup of Object.values(this.state.counts)) {
-        // Get the most recent row.
-        const rowObj = Object.entries(rowgroup).reduce(
-          ([k1, v1], [k2, v2]) => k1 > k2 ? [k1, v1] : [k2, v2])[1];
-        const num = rowObj[this.state.numerator];
-        const den = this.state.denominator == 'total' ? 1 :
-                    rowObj[this.state.denominator];
-        maxval = Math.max(maxval, num / den);
-      }
-
-      // Create a helper function for scaling.
+    if (this.state.data) {
+      // Find the maximum value of the user-defined function and use it to
+      // create a scaling function.
+      const f = this.f.bind(this);
+      const fmax = Math.max(...Object.values(this.state.data).map(f));
       function scale(x) {
-        return 0.6 * (1 - Math.pow(Math.E, -10 * (x / maxval)));
+        return 0.6 * (1 - Math.pow(Math.E, -10 * (x / fmax)));
       }
 
       // Construct polygons.
       let polygons = [];
-      for (const [fips, coordsets] of Object.entries(this.state.bounds)) {
-        if (fips in this.state.counts) {
-          for (const [i, coords] of coordsets.entries()) {
-            // Get the most recent row.
-            const rowObj = Object.entries(this.state.counts[fips]).reduce(
-              ([k1, v1], [k2, v2]) => k1 > k2 ? [k1, v1] : [k2, v2])[1];
-            const num = rowObj[this.state.numerator];
-            const den = this.state.denominator == 'total' ? 1 :
-                        rowObj[this.state.denominator];
-            const alpha = scale(num / den);
-            const msg = `${rowObj.cases} cases, ${rowObj.deaths} deaths\n` +
-                        `${coordsets.name}`;
-            polygons.push(<Polygon coordinates={coords}
-              key={coordsets.name + `\n${fips}-${i}`}
-              strokeWidth={0}
-              fillColor={`rgba(255, 0, 0, ${alpha})`}
-              tappable={true}
-              onPress={() => alert(msg)} />);
-          }
+      for (const [fips, county] of Object.entries(this.state.data)) {
+        // Skip the county if it's missing data,
+        if (!('population' in county) ||
+            !('latestCounts' in county) ||
+            !('bounds' in county)) {
+          continue;
+        }
+        // Construct alpha and message.
+        const alpha = scale(f(county));
+        const message =
+          `${county.latestCounts.cases} cases, ` +
+          `${county.latestCounts.deaths} deaths\n` +
+          `${county.name}, ${county.state}`;
+        // A county may be made up of multiple polygons.
+        for (const [i, bound] of county.bounds.entries()) {
+          polygons.push(<Polygon coordinates={bound}
+                                 key={`${fips}-${i}`}
+                                 strokeWidth={0}
+                                 fillColor={`rgba(255, 0, 0, ${alpha})`}
+                                 tappable={true}
+                                 onPress={() => alert(message)} />);
         }
       }
 
