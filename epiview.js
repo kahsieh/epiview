@@ -25,17 +25,18 @@ const rawCountsUrl = 'https://raw.githubusercontent.com/nytimes/covid-19-data/ma
  *   fips: {
  *     'name': string,
  *     'state': string,
- *     'population': number,
+ *     'population': string,
+ *     'landArea': number,
  *     'bounds': [[LatLng]],
  *     'counts': {
  *       'date': {
- *         'cases': number,
- *         'deaths': number,
+ *         'cases': string,
+ *         'deaths': string,
  *       },
  *     },
  *     'latestCounts': {
- *       'cases': number,
- *       'deaths': number,
+ *       'cases': string,
+ *       'deaths': string,
  *     }
  *   },
  * }
@@ -85,6 +86,7 @@ function addBounds(data) {
       data[fips].bounds = [];
     }
     // Populate data.
+    data[fips].landArea = (data[fips].landArea || 0) + feature.properties.ALAND;
     switch (feature.geometry.type) {
       case 'Polygon':
         const bound = feature.geometry.coordinates;
