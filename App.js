@@ -44,7 +44,7 @@ export default class App extends React.Component {
       case 'per case':
         den = county.latestCounts.cases;
         break;
-      case 'per 1,000 cap':
+      case 'per 1000 cap':
         den = county.population / 1e3;
         break;
       case 'per square km':
@@ -62,7 +62,7 @@ export default class App extends React.Component {
 
       // Create scaling and rounding helpers.
       function scale(x) {
-        return 0.6 * (1 - Math.pow(Math.E, -10 * (x / fmax)));
+        return 0.6 * (1 - Math.pow(Math.E, -50 * (x / fmax)));
       }
       function round(x) {
         return Math.round(x * 100 + Number.EPSILON) / 100;
@@ -122,7 +122,7 @@ export default class App extends React.Component {
                                      this.setState({denominator: value})}>
               <Picker.Item label="Total" value="total" />
               <Picker.Item label="Per case" value="per case" />
-              <Picker.Item label="Per 1,000 cap" value="per 1,000 cap" />
+              <Picker.Item label="Per 1000 cap" value="per 1000 cap" />
               <Picker.Item label="Per square km" value="per square km" />
             </Picker>
           </View>

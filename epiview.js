@@ -5,16 +5,23 @@ epiview.js
 Copyright (c) 2020 Kevin Hsieh. All Rights Reserved.
 */
 
-// Source: U.S. Census Bureau
-// URL: https://www.census.gov/content/census/en/data/tables/time-series/demo/popest/2010s-counties-total.html
+/**
+ * Source: U.S. Census Bureau
+ * URL: https://www.census.gov/content/census/en/data/tables/time-series/demo/popest/2010s-counties-total.html
+ */
 import rawPopulation from './assets/co-est2019-alldata.json';
 
-// Source: U.S. Census Bureau
-// URL: https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html
+/**
+ * Source: U.S. Census Bureau
+ * URL: https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html
+ */
 import rawBounds from './assets/cb_2018_us_county_20m.json';
 
-// Source: The New York Times
+/**
+ * Source: The New York Times
+ */
 const rawCountsUrl = 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv';
+
 
 /**
  * Retrieves and joins population, boundary, and case count data to produce a
@@ -68,6 +75,18 @@ function addPopulation(data) {
       population: row.POPESTIMATE2018,
     });
   }
+
+  // Special handling for New York City.
+  const nyc = '36000';
+  if (!(nyc in data)) {
+    data[nyc] = {};
+  }
+  Object.assign(data[nyc], {
+    name: 'New York City',
+    state: 'New York',
+    population: BOROUGHS.reduce(
+      (total, fips) => total + +data[fips].population),
+  })
 }
 
 /**
@@ -99,6 +118,19 @@ function addBounds(data) {
         break;
     }
   }
+
+  // Special handling for New York City.
+  const nyc = '36000';
+  if (!(nyc in data)) {
+    data[fips] = {};
+  }
+  if (!('bounds' in data[nyc])) {
+    data[nyc].bounds = [];
+  }
+  data[nyc].landArea = BOROUGHS.reduce(
+    (total, fips) => total + data[fips].landArea);
+  data[nyc].bounds = BOROUGHS.reduce(
+    (total, fips) => total.concat(data[fips].bounds), []);
 }
 
 /**
@@ -111,7 +143,7 @@ async function addCounts(data) {
                                              .then(parseCsv);
   for (const row of rawCounts) {
     // Get FIPS code and initialize.
-    const fips = row.fips;
+    const fips = row.county == 'New York City' ? '36000' : row.fips;
     if (!(fips in data)) {
       data[fips] = {};
     }
@@ -153,3 +185,14 @@ function parseCsv(csv) {
     row.split(',').map((value, j) => [header[j], value])));
   return data;
 }
+
+/**
+ * FIPS codes for the boroughs of NYC. Used for special handling.
+ */
+const BOROUGHS = [
+  36061,  // New York
+  36047,  // Kings
+  36081,  // Queens
+  36005,  // Bronx
+  36085,  // Richmond
+];
