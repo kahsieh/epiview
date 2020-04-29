@@ -7,16 +7,21 @@ import { compileData } from './epiview.js';
 export default class App extends React.Component {
   constructor(props) {
     super(props);
+    this.yesterday = new Date();
+    this.yesterday.setDate(this.yesterday.getDate() - 1);
     this.state = {
       // Data and polygons.
       data: null,
       polygons: [],
       // User-defined function.
       numerator: 'cases',
-      denominator: 'per 1000 cap',
-      date: new Date(),
+      denominator: 'per 1000 cap.',
+      mode: 'on',
+      refDate: new Date(2020, 0, 21),
+      date: this.yesterday,
       // Application state.
       recompute: false,
+      refPicking: false,
       picking: false,
     };
   }
@@ -65,8 +70,10 @@ export default class App extends React.Component {
       const alpha = scale(value);
       const title = `${county.name}, ${county.state}`;
       const message =
-        `${round(value)} ${this.state.numerator} ${this.state.denominator}` +
-        ` on ${this.state.date.toLocaleDateString()}`;
+        `${round(value)} ${this.state.numerator} ${this.state.denominator} ` +
+        `${this.state.mode} ` + (this.state.mode == 'diff. btw.' ?
+        this.state.refDate.toLocaleDateString() + ' and ' : '') +
+        this.state.date.toLocaleDateString();
 
       // Create the polygons that make up the county.
       for (const [i, bound] of county.bounds.entries()) {
@@ -87,19 +94,32 @@ export default class App extends React.Component {
    * Executes the user-defined function to find the value of a county.
    *
    * @param {!Object<string, *>} county Data table entry for a county.
+   * @param {?Date} date The date at which to evaluate the function.
    */
-  computeValue(county) {
-    // Detemine the date to be used. Stop if the county is missing data, or if
-    // a usable date cannot be found.
+  computeValue(county, date) {
+    // Stop if the county is missing data.
     if (!('population' in county) ||
         !('bounds' in county) ||
         !('counts' in county)) {
       return 0;
     }
-    let date = Object.keys(county.counts)
-                     .reverse()
-                     .find(k => new Date(k) <= this.state.date);
+
+    // If no date was specified, set date based on the mode. Compute the value
+    // on a reference date of necessary.
+    let refValue = 0;
     if (!date) {
+      date = this.state.date;
+      if (this.state.mode == 'diff. btw.') {
+        refValue = this.computeValue(county, this.state.refDate);
+      }
+    }
+
+    // Detemine the actual date to be used. Stop if a usable date cannot be
+    // found.
+    let actualDate = Object.keys(county.counts)
+                           .reverse()
+                           .find(k => new Date(k) <= date);
+    if (!actualDate) {
       return 0;
     }
 
@@ -107,10 +127,10 @@ export default class App extends React.Component {
     let num, den;
     switch (this.state.numerator) {
       case 'cases':
-        num = county.counts[date].cases;
+        num = county.counts[actualDate].cases;
         break;
       case 'deaths':
-        num = county.counts[date].deaths;
+        num = county.counts[actualDate].deaths;
         break;
     }
     switch (this.state.denominator) {
@@ -118,18 +138,18 @@ export default class App extends React.Component {
         den = 1;
         break;
       case 'per case':
-        den = county.counts[date].cases;
+        den = county.counts[actualDate].cases;
         break;
-      case 'per 1000 cap':
+      case 'per 1000 cap.':
         den = county.population / 1e3;
         break;
-      case 'per square km':
+      case 'per sq. km.':
         den = county.landArea / 1e6;
         break;
     }
 
     // Divide.
-    return num / den;
+    return num / den - refValue;
   }
 
   render() {
@@ -154,25 +174,49 @@ export default class App extends React.Component {
                 this.setState({denominator: value, recompute: true})}>
         <Picker.Item label='Total' value='total' />
         <Picker.Item label='Per case' value='per case' />
-        <Picker.Item label='Per 1000 cap' value='per 1000 cap' />
-        <Picker.Item label='Per square km' value='per square km' />
+        <Picker.Item label='Per 1000 cap.' value='per 1000 cap.' />
+        <Picker.Item label='Per sq. km.' value='per sq. km.' />
       </Picker>;
+    const modePicker =
+      <Picker selectedValue={this.state.mode}
+              style={{ width: 150 }}
+              onValueChange={(value, index) =>
+                this.setState({mode: value, recompute: true})}>
+        <Picker.Item label='On' value='on' />
+        <Picker.Item label='Diff. btw.' value='diff. btw.' />
+      </Picker>;
+    const refDatePicker =
+      <DateTimePicker value={this.state.refDate}
+                      minimumDate={new Date(2020, 0, 21)}
+                      maximumDate={this.yesterday}
+                      onChange={(e, value) => {
+                        if (value) {
+                          this.setState({
+                            refDate: value,
+                            refPicking: false,
+                            recompute: true,
+                          });
+                        }
+                        else {
+                          this.setState({refPicking: false});
+                        }
+                      }} />;
     const datePicker =
       <DateTimePicker value={this.state.date}
                       minimumDate={new Date(2020, 0, 21)}
-                      maximumDate={new Date()}
+                      maximumDate={this.yesterday}
                       onChange={(e, value) => {
                         if (value) {
                           this.setState({
                             date: value,
                             picking: false,
-                            recompute: true
+                            recompute: true,
                           });
                         }
                         else {
                           this.setState({picking: false});
                         }
-                      }} />
+                      }} />;
 
     // Create layout.
     const usa = {
@@ -203,6 +247,15 @@ export default class App extends React.Component {
               {denPicker}
             </View>
             <View style={styles.toolbarRow}>
+              {modePicker}
+              {this.state.mode == 'diff. btw.' &&
+                <Button title={this.state.refDate.toLocaleDateString()}
+                        onPress={() => this.setState({refPicking: true})} />
+              }
+              {this.state.refPicking && refDatePicker}
+              {this.state.mode == 'diff. btw.' &&
+                <Text>  and  </Text>
+              }
               <Button title={this.state.date.toLocaleDateString()}
                       onPress={() => this.setState({picking: true})} />
               {this.state.picking && datePicker}
