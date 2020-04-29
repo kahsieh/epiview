@@ -9,15 +9,17 @@ export default class App extends React.Component {
     super(props);
     this.yesterday = new Date();
     this.yesterday.setDate(this.yesterday.getDate() - 1);
+    this.lastWeek = new Date();
+    this.lastWeek.setDate(this.lastWeek.getDate() - 7);
     this.state = {
       // Data and polygons.
       data: null,
       polygons: [],
       // User-defined function.
-      numerator: 'cases',
+      numerator: 'new cases',
       denominator: 'per 1000 cap.',
       mode: 'on',
-      refDate: new Date(2020, 0, 21),
+      refDate: this.lastWeek,
       date: this.yesterday,
       // Application state.
       recompute: false,
@@ -65,22 +67,27 @@ export default class App extends React.Component {
         continue;
       }
 
-      // Compute the county's value and construct alpha, title, and message.
+      // Compute the county's value and construct title, message, and alpha.
       const value = this.computeValue(county);
-      const alpha = scale(value);
       const title = `${county.name}, ${county.state}`;
       const message =
         `${round(value)} ${this.state.numerator} ${this.state.denominator} ` +
-        `${this.state.mode} ` + (this.state.mode == 'diff. btw.' ?
-        this.state.refDate.toLocaleDateString() + ' and ' : '') +
+        `${this.state.mode} ` + (this.state.mode != 'on' ?
+        this.state.refDate.toLocaleDateString() + '–' : '') +
         this.state.date.toLocaleDateString();
+      let red = 255, blue = 0;
+      if (value < 0) {  // render negative values in blue
+        value = -value;
+        red = 0, blue = 255;
+      }
+      const alpha = scale(value);
 
       // Create the polygons that make up the county.
       for (const [i, bound] of county.bounds.entries()) {
         polygons.push(<Polygon coordinates={bound}
                         key={`${fips}-${i}`}
                         strokeWidth={0}
-                        fillColor={`rgba(255, 0, 0, ${round(alpha)})`}
+                        fillColor={`rgba(${red}, 0, ${blue}, ${round(alpha)})`}
                         tappable={true}
                         onPress={() => Alert.alert(title, message)} />);
       }
@@ -104,23 +111,49 @@ export default class App extends React.Component {
       return 0;
     }
 
-    // If no date was specified, set date based on the mode. Compute the value
-    // on a reference date of necessary.
-    let refValue = 0;
-    if (!date) {
-      date = this.state.date;
-      if (this.state.mode == 'diff. btw.') {
-        refValue = this.computeValue(county, this.state.refDate);
+    // If date is specified, determine the actual date to be used based on the
+    // available data. Stop if a usable date cannot be found.
+    let adjust = x => x;
+    let actualDate;
+    if (date) {
+      actualDate = Object.keys(county.counts)
+                         .reverse()
+                         .find(k => new Date(k) <= date);
+      if (!actualDate) {
+        return 0;
       }
     }
-
-    // Detemine the actual date to be used. Stop if a usable date cannot be
-    // found.
-    let actualDate = Object.keys(county.counts)
-                           .reverse()
-                           .find(k => new Date(k) <= date);
-    if (!actualDate) {
-      return 0;
+    // If no date is specified, set date based on the current state, then
+    // determine the actual date to be used based on the available data. Stop
+    // if a usable date cannot be found.
+    else {
+      date = this.state.date;
+      actualDate = Object.keys(county.counts)
+                         .reverse()
+                         .find(k => new Date(k) <= date);
+      if (!actualDate) {
+        return 0;
+      }
+      // If no date is specified (i.e., this isn't a recursive call), then
+      // possibly set an adjustment function based on the mode.
+      switch (this.state.mode) {
+        case 'on':
+          // Leave adjustment function as identity.
+          break;
+        case 'diff. btw.':
+          adjust = x => x - this.computeValue(county, this.state.refDate);
+          break;
+        case 'avg.':
+          adjust = x => {
+            let arr = [x];
+            let d = new Date(date);
+            while (d.setDate(d.getDate() - 1) >= this.state.refDate) {
+              arr.push(this.computeValue(county, d));
+            }
+            return arr.reduce((sum, v) => sum + v, 0) / arr.length;
+          };
+          break;
+      }
     }
 
     // Determine the value of the numerator and denominator.
@@ -128,6 +161,18 @@ export default class App extends React.Component {
     switch (this.state.numerator) {
       case 'cases':
         num = county.counts[actualDate].cases;
+        break;
+      case 'new cases':
+        num = county.counts[actualDate].cases;
+        // Subtract the previous day's number, if it's available.
+        let d = new Date(date);
+        d.setDate(d.getDate() - 1);
+        let actualPrevDate = Object.keys(county.counts)
+                                   .reverse()
+                                   .find(k => new Date(k) <= d);
+        if (actualPrevDate) {
+          num -= county.counts[actualPrevDate].cases;
+        }
         break;
       case 'deaths':
         num = county.counts[actualDate].deaths;
@@ -148,8 +193,8 @@ export default class App extends React.Component {
         break;
     }
 
-    // Divide.
-    return num / den - refValue;
+    // Divide and adjust.
+    return adjust(num / den);
   }
 
   render() {
@@ -161,15 +206,16 @@ export default class App extends React.Component {
     // Create picker components.
     const numPicker =
       <Picker selectedValue={this.state.numerator}
-              style={{ width: 150 }}
+              style={{ width: 160 }}
               onValueChange={(value, index) =>
                 this.setState({numerator: value, recompute: true})}>
         <Picker.Item label='Cases' value='cases' />
+        <Picker.Item label='New cases' value='new cases' />
         <Picker.Item label='Deaths' value='deaths' />
       </Picker>;
     const denPicker =
       <Picker selectedValue={this.state.denominator}
-              style={{ width: 200 }}
+              style={{ width: 180 }}
               onValueChange={(value, index) =>
                 this.setState({denominator: value, recompute: true})}>
         <Picker.Item label='Total' value='total' />
@@ -184,6 +230,7 @@ export default class App extends React.Component {
                 this.setState({mode: value, recompute: true})}>
         <Picker.Item label='On' value='on' />
         <Picker.Item label='Diff. btw.' value='diff. btw.' />
+        <Picker.Item label='Avg.' value='avg.' />
       </Picker>;
     const refDatePicker =
       <DateTimePicker value={this.state.refDate}
@@ -248,13 +295,13 @@ export default class App extends React.Component {
             </View>
             <View style={styles.toolbarRow}>
               {modePicker}
-              {this.state.mode == 'diff. btw.' &&
+              {this.state.mode != 'on' &&
                 <Button title={this.state.refDate.toLocaleDateString()}
                         onPress={() => this.setState({refPicking: true})} />
               }
               {this.state.refPicking && refDatePicker}
-              {this.state.mode == 'diff. btw.' &&
-                <Text>  and  </Text>
+              {this.state.mode != 'on' &&
+                <Text> – </Text>
               }
               <Button title={this.state.date.toLocaleDateString()}
                       onPress={() => this.setState({picking: true})} />
