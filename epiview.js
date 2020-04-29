@@ -22,7 +22,6 @@ import rawBounds from './assets/cb_2018_us_county_20m.json';
  */
 const rawCountsUrl = 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv';
 
-
 /**
  * Retrieves and joins population, boundary, and case count data to produce a
  * unified data table for the application.
