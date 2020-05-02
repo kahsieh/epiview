@@ -27,6 +27,106 @@ import rawBounds from './assets/cb_2018_us_county_20m.json';
 const rawCountsUrl = 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv';
 
 // -----------------------------------------------------------------------------
+// COMPUTATION
+// -----------------------------------------------------------------------------
+
+/**
+ * Evaluates a user-defined function (UDF) specified by a numerator,
+ * denominator, and mode on the given county for the given date (and possibly
+ * a reference date if the mode requires one).
+ *
+ * @param {!Object<string, *>} county Data table entry for a county.
+ * @param {!Date} date The date on which to evaluate the UDF.
+ * @param {string} numerator The numerator of the UDF.
+ * @param {string} denominator The denominator of the UDF.
+ * @param {string} mode The mode of the UDF.
+ * @param {?Date} refDate The reference date with which to evaluate the UDF.
+ */
+export function evaluate(county, date, numerator, denominator, mode, refDate) {
+  // Stop if the county is missing data.
+  if (!('population' in county) ||
+      !('bounds' in county) ||
+      !('counts' in county)) {
+    return 0;
+  }
+
+  switch (mode) {
+    case 'on':
+      return evaluateBasic(county, date, numerator, denominator);
+    case 'diff. btw.':
+      return evaluateBasic(county, date, numerator, denominator) -
+             evaluateBasic(county, refDate, numerator, denominator);
+    case 'avg.':
+      let values = [];
+      for (let d = new Date(date); d >= refDate; d.setDate(d.getDate() - 1)) {
+        values.push(evaluateBasic(county, d, numerator, denominator));
+      }
+      return values.reduce((sum, v) => sum + v, 0) / values.length;
+    default:
+      return 0;  // shouldn't happen
+  }
+}
+
+/**
+ * Evalutes a basic user-defined function (UDF) specified by a numerator and a
+ * denominator on the given county for the given date.
+ *
+ * @param {!Object<string, *>} county Data table entry for a county.
+ * @param {!Date} date The date on which to evaluate the basic UDF.
+ * @param {string} numerator The numerator of the basic UDF.
+ * @param {string} denominator The denominator of the basic UDF.
+ * @return {number} The result of the basic UDF.
+ */
+function evaluateBasic(county, date, numerator, denominator) {
+  // Find a key (date string) on or before to the requested date. Stop if none
+  // is available.
+  const dateStr = Object.keys(county.counts)
+                        .reverse()
+                        .find(k => parseDate(k) <= date);
+  if (!dateStr) {
+    return 0;
+  }
+
+  // Set the numerator and denominator values.
+  let num, den;
+  switch (numerator) {
+    case 'cases':
+      num = county.counts[dateStr].cases;
+      break;
+    case 'new cases':
+      num = county.counts[dateStr].cases;
+      // Subtract the previous day's number, if it's available.
+      let prevDate = new Date(date);
+      prevDate.setDate(prevDate.getDate() - 1);
+      let prevDateStr = Object.keys(county.counts)
+                              .reverse()
+                              .find(k => parseDate(k) <= prevDate);
+      if (prevDateStr) {
+        num -= county.counts[prevDateStr].cases;
+      }
+      break;
+    case 'deaths':
+      num = county.counts[dateStr].deaths;
+      break;
+  }
+  switch (denominator) {
+    case 'total':
+      den = 1;
+      break;
+    case 'per case':
+      den = county.counts[dateStr].cases;
+      break;
+    case 'per 1000 cap.':
+      den = county.population / 1e3;
+      break;
+    case 'per sq. km.':
+      den = county.landArea / 1e6;
+      break;
+  }
+  return num / den;
+}
+
+// -----------------------------------------------------------------------------
 // DATA COMPILATION
 // -----------------------------------------------------------------------------
 
@@ -34,7 +134,8 @@ const rawCountsUrl = 'https://raw.githubusercontent.com/nytimes/covid-19-data/ma
  * Retrieves and joins population, boundary, and case count data to produce a
  * unified data table for the application.
  *
- * @return {{data: !Object<string, Object<string, *>>, maximumDate: string}}
+ * @return {{data: !Object<string, Object<string, *>>,
+ *           minDate: string, maxDate: string}}
  *     Data table and latest date available in the data. Table format:
  *     {
  *       fips: {
@@ -56,8 +157,8 @@ export async function compileData() {
   let data = {};
   addPopulation(data);
   addBounds(data);
-  const maximumDate = await addCounts(data);
-  return {data, maximumDate};
+  const {minDate, maxDate} = await addCounts(data);
+  return {data, minDate, maxDate};
 }
 
 /**
@@ -141,12 +242,13 @@ function addBounds(data) {
  * Populates the data table with case count data.
  *
  * @param {!Object<string, Object<string, *>>} data Data table to populate.
- * @return {string} The latest date available in the data.
+ * @return {{minDate: string, maxDate: string}} The earliest and latest date
+ *     available in the data.
  */
 async function addCounts(data) {
   const rawCounts = await fetch(rawCountsUrl).then(res => res.text())
                                              .then(parseCsv);
-  let maximumDate = '';
+  let minDate = '', maxDate = '';
   for (const row of rawCounts) {
     // Get FIPS code and initialize.
     const fips = row.county == 'New York City' ? '36000' : row.fips;
@@ -161,11 +263,14 @@ async function addCounts(data) {
       cases: row.cases,
       deaths: row.deaths,
     };
-    if (row.date > maximumDate) {
-      maximumDate = row.date;
+    if (!minDate || row.date < minDate) {
+      minDate = row.date;
+    }
+    if (!maxDate || row.date > maxDate) {
+      maxDate = row.date;
     }
   }
-  return maximumDate;
+  return {minDate, maxDate};
 }
 
 // -----------------------------------------------------------------------------

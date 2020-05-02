@@ -2,23 +2,23 @@ import React from 'react';
 import { ActivityIndicator, Alert, Button, Picker, StyleSheet, Text, View, Dimensions } from 'react-native';
 import MapView, { Polygon } from 'react-native-maps';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { compileData, parseDate } from './epiview.js';
+import { compileData, evaluate, parseDate } from './epiview.js';
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       // Data.
-      data: null,
-      minimumDate: parseDate('2020-01-21'),
-      maximumDate: new Date(),
+      data: null,  // set in componentDidMount
+      minDate: new Date(),  // set in componentDidMount
+      maxDate: new Date(),  // set in componentDidMount
       polygons: [],
       // User-defined function.
       numerator: 'new cases',
       denominator: 'per 1000 cap.',
       mode: 'on',
-      refDate: new Date(),
-      date: new Date(),
+      refDate: new Date(),  // initial value set in componentDidMount
+      date: new Date(),  // initial value set in componentDidMount
       // Application state.
       recompute: false,
       refPicking: false,
@@ -27,18 +27,19 @@ export default class App extends React.Component {
   }
 
   /**
-   * Downloads and compiles the data table. Sets state.data and triggers a
-   * recompute.
+   * Downloads and compiles the data table. Sets data and data-dependent state
+   * variables and triggers a recompute.
    */
   componentDidMount() {
     compileData().then(res => {
-      const refDate = parseDate(res.maximumDate);
+      const refDate = parseDate(res.maxDate);
       refDate.setDate(refDate.getDate() - 7);
       this.setState({
         data: res.data,
-        maximumDate: parseDate(res.maximumDate),
+        minDate: parseDate(res.minDate),
+        maxDate: parseDate(res.maxDate),
         refDate: refDate,
-        date: parseDate(res.maximumDate),
+        date: parseDate(res.maxDate),
         recompute: true,
       });
     });
@@ -54,8 +55,9 @@ export default class App extends React.Component {
     if (!this.state.data) {
       return;
     }
-    let fmax = Math.max(0, ...Object.values(this.state.data)
-                                    .map(county => this.computeValue(county)));
+    let fmax = Math.max(0, ...Object.values(this.state.data).map(county =>
+      evaluate(county, this.state.date, this.state.numerator,
+        this.state.denominator, this.state.mode, this.state.refDate)));
 
     // If fmax is 0, change it to 1 so that we can divide by it. Then, use fmax
     // to create scale and round functions.
@@ -76,7 +78,8 @@ export default class App extends React.Component {
       }
 
       // Compute the county's value and construct title, message, and alpha.
-      const value = this.computeValue(county);
+      const value = evaluate(county,this.state.date, this.state.numerator,
+        this.state.denominator, this.state.mode, this.state.refDate);
       const title = `${county.name}, ${county.state}`;
       const message =
         `${round(value)} ${this.state.numerator} ${this.state.denominator} ` +
@@ -103,106 +106,6 @@ export default class App extends React.Component {
 
     // Update state.
     this.setState({polygons: polygons, recompute: false});
-  }
-
-  /**
-   * Executes the user-defined function to find the value of a county.
-   *
-   * @param {!Object<string, *>} county Data table entry for a county.
-   * @param {?Date} date The date at which to evaluate the function.
-   */
-  computeValue(county, date) {
-    // Stop if the county is missing data.
-    if (!('population' in county) ||
-        !('bounds' in county) ||
-        !('counts' in county)) {
-      return 0;
-    }
-
-    // If date is specified, determine the actual date to be used based on the
-    // available data. Stop if a usable date cannot be found.
-    let adjust = x => x;
-    let actualDate;
-    if (date) {
-      actualDate = Object.keys(county.counts)
-                         .reverse()
-                         .find(k => parseDate(k) <= date);
-      if (!actualDate) {
-        return 0;
-      }
-    }
-    // If no date is specified, set date based on the current state, then
-    // determine the actual date to be used based on the available data. Stop
-    // if a usable date cannot be found.
-    else {
-      date = this.state.date;
-      actualDate = Object.keys(county.counts)
-                         .reverse()
-                         .find(k => parseDate(k) <= date);
-      if (!actualDate) {
-        return 0;
-      }
-      // If no date is specified (i.e., this isn't a recursive call), then
-      // possibly set an adjustment function based on the mode.
-      switch (this.state.mode) {
-        case 'on':
-          // Leave adjustment function as identity.
-          break;
-        case 'diff. btw.':
-          adjust = x => x - this.computeValue(county, this.state.refDate);
-          break;
-        case 'avg.':
-          adjust = x => {
-            let arr = [x];
-            let d = new Date(date);
-            while (d.setDate(d.getDate() - 1) >= this.state.refDate) {
-              arr.push(this.computeValue(county, d));
-            }
-            return arr.reduce((sum, v) => sum + v, 0) / arr.length;
-          };
-          break;
-      }
-    }
-
-    // Determine the value of the numerator and denominator.
-    let num, den;
-    switch (this.state.numerator) {
-      case 'cases':
-        num = county.counts[actualDate].cases;
-        break;
-      case 'new cases':
-        num = county.counts[actualDate].cases;
-        // Subtract the previous day's number, if it's available.
-        let d = new Date(date);
-        d.setDate(d.getDate() - 1);
-        let actualPrevDate = Object.keys(county.counts)
-                                   .reverse()
-                                   .find(k => parseDate(k) <= d);
-        if (actualPrevDate) {
-          num -= county.counts[actualPrevDate].cases;
-        }
-        break;
-      case 'deaths':
-        num = county.counts[actualDate].deaths;
-        break;
-    }
-    switch (this.state.denominator) {
-      case 'total':
-        den = 1;
-        break;
-      case 'per case':
-        den = county.counts[actualDate].cases;
-        break;
-      case 'per 1000 cap.':
-        den = county.population / 1e3;
-        break;
-      case 'per sq. km.':
-        den = county.landArea / 1e6;
-        break;
-    }
-
-    // Divide and adjust.
-    return adjust(num / den);
   }
 
   render() {
@@ -242,8 +145,8 @@ export default class App extends React.Component {
       </Picker>;
     const refDatePicker =
       <DateTimePicker value={this.state.refDate}
-                      minimumDate={this.state.minimumDate}
-                      maximumDate={this.state.maximumDate}
+                      minimumDate={this.state.minDate}
+                      maximumDate={this.state.maxDate}
                       onChange={(e, value) => {
                         if (value) {
                           this.setState({
@@ -258,8 +161,8 @@ export default class App extends React.Component {
                       }} />;
     const datePicker =
       <DateTimePicker value={this.state.date}
-                      minimumDate={this.state.minimumDate}
-                      maximumDate={this.state.maximumDate}
+                      minimumDate={this.state.minDate}
+                      maximumDate={this.state.maxDate}
                       onChange={(e, value) => {
                         if (value) {
                           this.setState({
