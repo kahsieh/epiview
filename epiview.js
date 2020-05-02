@@ -93,7 +93,7 @@ function evaluateBasic(county, date, numerator, denominator) {
     case 'cases':
       num = county.counts[dateStr].cases;
       break;
-    case 'new cases':
+    case 'new cases': {
       num = county.counts[dateStr].cases;
       // Subtract the previous day's number, if it's available.
       let prevDate = new Date(date);
@@ -105,9 +105,23 @@ function evaluateBasic(county, date, numerator, denominator) {
         num -= county.counts[prevDateStr].cases;
       }
       break;
+    }
     case 'deaths':
       num = county.counts[dateStr].deaths;
       break;
+    case 'new deaths': {
+      num = county.counts[dateStr].deaths;
+      // Subtract the previous day's number, if it's available.
+      let prevDate = new Date(date);
+      prevDate.setDate(prevDate.getDate() - 1);
+      let prevDateStr = Object.keys(county.counts)
+                              .reverse()
+                              .find(k => parseDate(k) <= prevDate);
+      if (prevDateStr) {
+        num -= county.counts[prevDateStr].deaths;
+      }
+      break;
+    }
   }
   switch (denominator) {
     case 'total':

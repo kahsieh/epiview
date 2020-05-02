@@ -117,12 +117,13 @@ export default class App extends React.Component {
     // Create picker components.
     const numPicker =
       <Picker selectedValue={this.state.numerator}
-              style={{ width: 160 }}
+              style={{ width: 180 }}
               onValueChange={(value, index) =>
                 this.setState({numerator: value, recompute: true})}>
         <Picker.Item label='Cases' value='cases' />
         <Picker.Item label='New cases' value='new cases' />
         <Picker.Item label='Deaths' value='deaths' />
+        <Picker.Item label='New deaths' value='new deaths' />
       </Picker>;
     const denPicker =
       <Picker selectedValue={this.state.denominator}
