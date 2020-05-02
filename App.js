@@ -2,25 +2,23 @@ import React from 'react';
 import { ActivityIndicator, Alert, Button, Picker, StyleSheet, Text, View, Dimensions } from 'react-native';
 import MapView, { Polygon } from 'react-native-maps';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { compileData } from './epiview.js';
+import { compileData, parseDate } from './epiview.js';
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
-    this.yesterday = new Date();
-    this.yesterday.setDate(this.yesterday.getDate() - 1);
-    this.lastWeek = new Date();
-    this.lastWeek.setDate(this.lastWeek.getDate() - 7);
     this.state = {
-      // Data and polygons.
+      // Data.
       data: null,
+      minimumDate: parseDate('2020-01-21'),
+      maximumDate: new Date(),
       polygons: [],
       // User-defined function.
       numerator: 'new cases',
       denominator: 'per 1000 cap.',
       mode: 'on',
-      refDate: this.lastWeek,
-      date: this.yesterday,
+      refDate: new Date(),
+      date: new Date(),
       // Application state.
       recompute: false,
       refPicking: false,
@@ -33,7 +31,17 @@ export default class App extends React.Component {
    * recompute.
    */
   componentDidMount() {
-    compileData().then(data => this.setState({data: data, recompute: true}));
+    compileData().then(res => {
+      const refDate = parseDate(res.maximumDate);
+      refDate.setDate(refDate.getDate() - 7);
+      this.setState({
+        data: res.data,
+        maximumDate: parseDate(res.maximumDate),
+        refDate: refDate,
+        date: parseDate(res.maximumDate),
+        recompute: true,
+      });
+    });
   }
 
   /**
@@ -118,7 +126,7 @@ export default class App extends React.Component {
     if (date) {
       actualDate = Object.keys(county.counts)
                          .reverse()
-                         .find(k => new Date(k) <= date);
+                         .find(k => parseDate(k) <= date);
       if (!actualDate) {
         return 0;
       }
@@ -130,7 +138,7 @@ export default class App extends React.Component {
       date = this.state.date;
       actualDate = Object.keys(county.counts)
                          .reverse()
-                         .find(k => new Date(k) <= date);
+                         .find(k => parseDate(k) <= date);
       if (!actualDate) {
         return 0;
       }
@@ -169,7 +177,7 @@ export default class App extends React.Component {
         d.setDate(d.getDate() - 1);
         let actualPrevDate = Object.keys(county.counts)
                                    .reverse()
-                                   .find(k => new Date(k) <= d);
+                                   .find(k => parseDate(k) <= d);
         if (actualPrevDate) {
           num -= county.counts[actualPrevDate].cases;
         }
@@ -234,8 +242,8 @@ export default class App extends React.Component {
       </Picker>;
     const refDatePicker =
       <DateTimePicker value={this.state.refDate}
-                      minimumDate={new Date(2020, 0, 21)}
-                      maximumDate={this.yesterday}
+                      minimumDate={this.state.minimumDate}
+                      maximumDate={this.state.maximumDate}
                       onChange={(e, value) => {
                         if (value) {
                           this.setState({
@@ -250,8 +258,8 @@ export default class App extends React.Component {
                       }} />;
     const datePicker =
       <DateTimePicker value={this.state.date}
-                      minimumDate={new Date(2020, 0, 21)}
-                      maximumDate={this.yesterday}
+                      minimumDate={this.state.minimumDate}
+                      maximumDate={this.state.maximumDate}
                       onChange={(e, value) => {
                         if (value) {
                           this.setState({

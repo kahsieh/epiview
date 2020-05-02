@@ -5,6 +5,10 @@ epiview.js
 Copyright (c) 2020 Kevin Hsieh. All Rights Reserved.
 */
 
+// -----------------------------------------------------------------------------
+// DATA SOURCES
+// -----------------------------------------------------------------------------
+
 /**
  * Source: U.S. Census Bureau
  * URL: https://www.census.gov/content/census/en/data/tables/time-series/demo/popest/2010s-counties-total.html
@@ -22,37 +26,38 @@ import rawBounds from './assets/cb_2018_us_county_20m.json';
  */
 const rawCountsUrl = 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv';
 
+// -----------------------------------------------------------------------------
+// DATA COMPILATION
+// -----------------------------------------------------------------------------
+
 /**
  * Retrieves and joins population, boundary, and case count data to produce a
  * unified data table for the application.
  *
- * @return {!Object<string, Object<string, *>>} Data table. Format:
- * {
- *   fips: {
- *     'name': string,
- *     'state': string,
- *     'population': string,
- *     'landArea': number,
- *     'bounds': [[LatLng]],
- *     'counts': {
- *       'date': {
- *         'cases': string,
- *         'deaths': string,
+ * @return {{data: !Object<string, Object<string, *>>, maximumDate: string}}
+ *     Data table and latest date available in the data. Table format:
+ *     {
+ *       fips: {
+ *         'name': string,
+ *         'state': string,
+ *         'population': string,
+ *         'landArea': number,
+ *         'bounds': !Array<Array<LatLng>>,
+ *         'counts': {
+ *           'date': {
+ *             'cases': string,
+ *             'deaths': string,
+ *           },
+ *         },
  *       },
- *     },
- *     'latestCounts': {
- *       'cases': string,
- *       'deaths': string,
  *     }
- *   },
- * }
  */
 export async function compileData() {
   let data = {};
   addPopulation(data);
   addBounds(data);
-  await addCounts(data);
-  return data;
+  const maximumDate = await addCounts(data);
+  return {data, maximumDate};
 }
 
 /**
@@ -136,10 +141,12 @@ function addBounds(data) {
  * Populates the data table with case count data.
  *
  * @param {!Object<string, Object<string, *>>} data Data table to populate.
+ * @return {string} The latest date available in the data.
  */
 async function addCounts(data) {
   const rawCounts = await fetch(rawCountsUrl).then(res => res.text())
                                              .then(parseCsv);
+  let maximumDate = '';
   for (const row of rawCounts) {
     // Get FIPS code and initialize.
     const fips = row.county == 'New York City' ? '36000' : row.fips;
@@ -154,12 +161,16 @@ async function addCounts(data) {
       cases: row.cases,
       deaths: row.deaths,
     };
-    data[fips].latestCounts = {
-      cases: row.cases,
-      deaths: row.deaths,
-    };
+    if (row.date > maximumDate) {
+      maximumDate = row.date;
+    }
   }
+  return maximumDate;
 }
+
+// -----------------------------------------------------------------------------
+// PARSERS
+// -----------------------------------------------------------------------------
 
 /**
  * Converts a GeoJSON coordinate to a LatLng.
@@ -184,6 +195,22 @@ function parseCsv(csv) {
     row.split(',').map((value, j) => [header[j], value])));
   return data;
 }
+
+/**
+ * Converts an ISO date string (YYYY-MM-DD) to a Date object in the local time
+ * zone.
+ *
+ * @param {string} dateStr ISO date string (YYYY-MM-DD).
+ * @return {!Date} Corresponding Date object in the local time zone.
+ */
+export function parseDate(dateStr) {
+  const parts = dateStr.split('-');
+  return new Date(parts[0], parts[1] - 1, parts[2]);
+}
+
+// -----------------------------------------------------------------------------
+// OTHER
+// -----------------------------------------------------------------------------
 
 /**
  * FIPS codes for the boroughs of NYC. Used for special handling.
