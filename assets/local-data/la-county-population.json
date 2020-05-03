@@ -1,0 +1,1327 @@
+[
+  {
+    "name": "Acton",
+    "population": 6522,
+    "area_sqmi": 39.3
+  },
+  {
+    "name": "Adams-Normandie",
+    "population": 17596,
+    "area_sqmi": 0.8
+  },
+  {
+    "name": "Agoura Hills",
+    "population": 20324,
+    "area_sqmi": 8.1
+  },
+  {
+    "name": "Agua Dulce",
+    "population": 3130,
+    "area_sqmi": 31.5
+  },
+  {
+    "name": "Alhambra",
+    "population": 85961,
+    "area_sqmi": 7.6
+  },
+  {
+    "name": "Alondra Park",
+    "population": 8604,
+    "area_sqmi": 1.1
+  },
+  {
+    "name": "Altadena",
+    "population": 42680,
+    "area_sqmi": 8.7
+  },
+  {
+    "name": "Angeles Crest",
+    "population": 1175,
+    "area_sqmi": 430.5
+  },
+  {
+    "name": "Arcadia",
+    "population": 52951,
+    "area_sqmi": 11.2
+  },
+  {
+    "name": "Arleta",
+    "population": 31068,
+    "area_sqmi": 3.1
+  },
+  {
+    "name": "Arlington Heights",
+    "population": 22096,
+    "area_sqmi": 1
+  },
+  {
+    "name": "Artesia",
+    "population": 16380,
+    "area_sqmi": 1.6
+  },
+  {
+    "name": "Athens",
+    "population": 9101,
+    "area_sqmi": 1.3
+  },
+  {
+    "name": "Atwater Village",
+    "population": 14888,
+    "area_sqmi": 1.8
+  },
+  {
+    "name": "Avalon",
+    "population": 3181,
+    "area_sqmi": 2.7
+  },
+  {
+    "name": "Avocado Heights",
+    "population": 17415,
+    "area_sqmi": 2.9
+  },
+  {
+    "name": "Azusa",
+    "population": 44384,
+    "area_sqmi": 9.9
+  },
+  {
+    "name": "Baldwin Hills/Crenshaw",
+    "population": 30123,
+    "area_sqmi": 2.9
+  },
+  {
+    "name": "Baldwin Park",
+    "population": 75753,
+    "area_sqmi": 6.8
+  },
+  {
+    "name": "Bel-Air",
+    "population": 7691,
+    "area_sqmi": 6.4
+  },
+  {
+    "name": "Bell",
+    "population": 36667,
+    "area_sqmi": 2.6
+  },
+  {
+    "name": "Bell Gardens",
+    "population": 44054,
+    "area_sqmi": 2.5
+  },
+  {
+    "name": "Bellflower",
+    "population": 72829,
+    "area_sqmi": 6.2
+  },
+  {
+    "name": "Beverly Crest",
+    "population": 10852,
+    "area_sqmi": 8.2
+  },
+  {
+    "name": "Beverly Grove",
+    "population": 21417,
+    "area_sqmi": 1.6
+  },
+  {
+    "name": "Beverly Hills",
+    "population": 33829,
+    "area_sqmi": 5.7
+  },
+  {
+    "name": "Beverlywood",
+    "population": 6080,
+    "area_sqmi": 0.8
+  },
+  {
+    "name": "Boyle Heights",
+    "population": 92756,
+    "area_sqmi": 6.5
+  },
+  {
+    "name": "Bradbury",
+    "population": 1268,
+    "area_sqmi": 1.9
+  },
+  {
+    "name": "Brentwood",
+    "population": 31344,
+    "area_sqmi": 15.2
+  },
+  {
+    "name": "Broadway-Manchester",
+    "population": 23471,
+    "area_sqmi": 1.6
+  },
+  {
+    "name": "Burbank",
+    "population": 100316,
+    "area_sqmi": 17.3
+  },
+  {
+    "name": "Calabasas",
+    "population": 23130,
+    "area_sqmi": 18.5
+  },
+  {
+    "name": "Canoga Park",
+    "population": 53227,
+    "area_sqmi": 4.3
+  },
+  {
+    "name": "Carson",
+    "population": 89549,
+    "area_sqmi": 19.1
+  },
+  {
+    "name": "Carthay",
+    "population": 4866,
+    "area_sqmi": 0.5
+  },
+  {
+    "name": "Castaic",
+    "population": 16843,
+    "area_sqmi": 5.5
+  },
+  {
+    "name": "Castaic Canyons",
+    "population": 7757,
+    "area_sqmi": 192.7
+  },
+  {
+    "name": "Central-Alameda",
+    "population": 40947,
+    "area_sqmi": 2.2
+  },
+  {
+    "name": "Century City",
+    "population": 5513,
+    "area_sqmi": 0.7
+  },
+  {
+    "name": "Cerritos",
+    "population": 51831,
+    "area_sqmi": 8.9
+  },
+  {
+    "name": "Charter Oak",
+    "population": 9046,
+    "area_sqmi": 0.9
+  },
+  {
+    "name": "Chatsworth",
+    "population": 35073,
+    "area_sqmi": 15.2
+  },
+  {
+    "name": "Chesterfield Square",
+    "population": 6062,
+    "area_sqmi": 0.6
+  },
+  {
+    "name": "Cheviot Hills",
+    "population": 6945,
+    "area_sqmi": 1.5
+  },
+  {
+    "name": "Chinatown",
+    "population": 9610,
+    "area_sqmi": 0.9
+  },
+  {
+    "name": "Citrus",
+    "population": 11964,
+    "area_sqmi": 1
+  },
+  {
+    "name": "Claremont",
+    "population": 35397,
+    "area_sqmi": 16.7
+  },
+  {
+    "name": "Commerce",
+    "population": 12583,
+    "area_sqmi": 6.6
+  },
+  {
+    "name": "Compton",
+    "population": 94384,
+    "area_sqmi": 10.3
+  },
+  {
+    "name": "Covina",
+    "population": 50954,
+    "area_sqmi": 7.6
+  },
+  {
+    "name": "Cudahy",
+    "population": 24208,
+    "area_sqmi": 1.2
+  },
+  {
+    "name": "Culver City",
+    "population": 38816,
+    "area_sqmi": 5.2
+  },
+  {
+    "name": "Cypress Park",
+    "population": 9764,
+    "area_sqmi": 0.7
+  },
+  {
+    "name": "Del Aire",
+    "population": 9039,
+    "area_sqmi": 1
+  },
+  {
+    "name": "Del Rey",
+    "population": 28010,
+    "area_sqmi": 2.5
+  },
+  {
+    "name": "Desert View Highlands",
+    "population": 2287,
+    "area_sqmi": 0.4
+  },
+  {
+    "name": "Diamond Bar",
+    "population": 56784,
+    "area_sqmi": 15.1
+  },
+  {
+    "name": "Downey",
+    "population": 107323,
+    "area_sqmi": 12.5
+  },
+  {
+    "name": "Downtown",
+    "population": 27849,
+    "area_sqmi": 5.8
+  },
+  {
+    "name": "Duarte",
+    "population": 21486,
+    "area_sqmi": 6.7
+  },
+  {
+    "name": "Eagle Rock",
+    "population": 32493,
+    "area_sqmi": 4.3
+  },
+  {
+    "name": "East Compton",
+    "population": 13802,
+    "area_sqmi": 0.8
+  },
+  {
+    "name": "East Hollywood",
+    "population": 73967,
+    "area_sqmi": 2.4
+  },
+  {
+    "name": "East La Mirada",
+    "population": 9442,
+    "area_sqmi": 1.1
+  },
+  {
+    "name": "East Los Angeles",
+    "population": 125897,
+    "area_sqmi": 7.5
+  },
+  {
+    "name": "East Pasadena",
+    "population": 6045,
+    "area_sqmi": 1.3
+  },
+  {
+    "name": "East San Gabriel",
+    "population": 22171,
+    "area_sqmi": 2.2
+  },
+  {
+    "name": "Echo Park",
+    "population": 40455,
+    "area_sqmi": 2.4
+  },
+  {
+    "name": "El Monte",
+    "population": 116249,
+    "area_sqmi": 9.7
+  },
+  {
+    "name": "El Segundo",
+    "population": 15970,
+    "area_sqmi": 5.5
+  },
+  {
+    "name": "El Sereno",
+    "population": 40954,
+    "area_sqmi": 4.2
+  },
+  {
+    "name": "Elizabeth Lake",
+    "population": 1379,
+    "area_sqmi": 6.3
+  },
+  {
+    "name": "Elysian Park",
+    "population": 2530,
+    "area_sqmi": 1.6
+  },
+  {
+    "name": "Elysian Valley",
+    "population": 7387,
+    "area_sqmi": 0.8
+  },
+  {
+    "name": "Encino",
+    "population": 41905,
+    "area_sqmi": 9.5
+  },
+  {
+    "name": "Exposition Park",
+    "population": 31062,
+    "area_sqmi": 1.8
+  },
+  {
+    "name": "Fairfax",
+    "population": 12490,
+    "area_sqmi": 1.2
+  },
+  {
+    "name": "Florence",
+    "population": 43815,
+    "area_sqmi": 2.8
+  },
+  {
+    "name": "Florence-Firestone",
+    "population": 60154,
+    "area_sqmi": 3.6
+  },
+  {
+    "name": "Gardena",
+    "population": 57818,
+    "area_sqmi": 5.8
+  },
+  {
+    "name": "Glassell Park",
+    "population": 23467,
+    "area_sqmi": 2.8
+  },
+  {
+    "name": "Glendale",
+    "population": 195047,
+    "area_sqmi": 30.6
+  },
+  {
+    "name": "Glendora",
+    "population": 50177,
+    "area_sqmi": 19.5
+  },
+  {
+    "name": "Gramercy Park",
+    "population": 10047,
+    "area_sqmi": 1.1
+  },
+  {
+    "name": "Granada Hills",
+    "population": 50535,
+    "area_sqmi": 15.1
+  },
+  {
+    "name": "Green Meadows",
+    "population": 28381,
+    "area_sqmi": 2.2
+  },
+  {
+    "name": "Green Valley",
+    "population": 754,
+    "area_sqmi": 2.6
+  },
+  {
+    "name": "Hacienda Heights",
+    "population": 53525,
+    "area_sqmi": 11.9
+  },
+  {
+    "name": "Hancock Park",
+    "population": 9804,
+    "area_sqmi": 1.5
+  },
+  {
+    "name": "Harbor City",
+    "population": 23561,
+    "area_sqmi": 2.6
+  },
+  {
+    "name": "Harbor Gateway",
+    "population": 39688,
+    "area_sqmi": 5.1
+  },
+  {
+    "name": "Harvard Heights",
+    "population": 18587,
+    "area_sqmi": 0.8
+  },
+  {
+    "name": "Harvard Park",
+    "population": 10297,
+    "area_sqmi": 0.6
+  },
+  {
+    "name": "Hasley Canyon",
+    "population": 423,
+    "area_sqmi": 3.1
+  },
+  {
+    "name": "Hawaiian Gardens",
+    "population": 14915,
+    "area_sqmi": 1
+  },
+  {
+    "name": "Hawthorne",
+    "population": 86265,
+    "area_sqmi": 6.2
+  },
+  {
+    "name": "Hermosa Beach",
+    "population": 18442,
+    "area_sqmi": 1.5
+  },
+  {
+    "name": "Hidden Hills",
+    "population": 1875,
+    "area_sqmi": 1.7
+  },
+  {
+    "name": "Highland Park",
+    "population": 57566,
+    "area_sqmi": 3.4
+  },
+  {
+    "name": "Historic South-Central",
+    "population": 49728,
+    "area_sqmi": 2.6
+  },
+  {
+    "name": "Hollywood",
+    "population": 77818,
+    "area_sqmi": 3.5
+  },
+  {
+    "name": "Hollywood Hills",
+    "population": 21588,
+    "area_sqmi": 7
+  },
+  {
+    "name": "Hollywood Hills West",
+    "population": 14860,
+    "area_sqmi": 4.9
+  },
+  {
+    "name": "Huntington Park",
+    "population": 61370,
+    "area_sqmi": 3
+  },
+  {
+    "name": "Hyde Park",
+    "population": 36635,
+    "area_sqmi": 2.9
+  },
+  {
+    "name": "Industry",
+    "population": 1008,
+    "area_sqmi": 12.4
+  },
+  {
+    "name": "Inglewood",
+    "population": 112482,
+    "area_sqmi": 9.1
+  },
+  {
+    "name": "Irwindale",
+    "population": 1472,
+    "area_sqmi": 9.6
+  },
+  {
+    "name": "Jefferson Park",
+    "population": 23130,
+    "area_sqmi": 1.4
+  },
+  {
+    "name": "Koreatown",
+    "population": 115070,
+    "area_sqmi": 2.7
+  },
+  {
+    "name": "La Ca�ada Flintridge",
+    "population": 20381,
+    "area_sqmi": 8.6
+  },
+  {
+    "name": "La Crescenta-Montrose",
+    "population": 18507,
+    "area_sqmi": 3.4
+  },
+  {
+    "name": "La Habra Heights",
+    "population": 6094,
+    "area_sqmi": 6.2
+  },
+  {
+    "name": "La Mirada",
+    "population": 46782,
+    "area_sqmi": 7.8
+  },
+  {
+    "name": "La Puente",
+    "population": 41009,
+    "area_sqmi": 3.5
+  },
+  {
+    "name": "La Verne",
+    "population": 33117,
+    "area_sqmi": 8.6
+  },
+  {
+    "name": "Ladera Heights",
+    "population": 6509,
+    "area_sqmi": 2.9
+  },
+  {
+    "name": "Lake Balboa",
+    "population": 24238,
+    "area_sqmi": 3.1
+  },
+  {
+    "name": "Lake Hughes",
+    "population": 571,
+    "area_sqmi": 9.4
+  },
+  {
+    "name": "Lake Los Angeles",
+    "population": 11141,
+    "area_sqmi": 7
+  },
+  {
+    "name": "Lake View Terrace",
+    "population": 11803,
+    "area_sqmi": 4.2
+  },
+  {
+    "name": "Lakewood",
+    "population": 79412,
+    "area_sqmi": 9.5
+  },
+  {
+    "name": "Lancaster",
+    "population": 120783,
+    "area_sqmi": 102.4
+  },
+  {
+    "name": "Larchmont",
+    "population": 8631,
+    "area_sqmi": 0.5
+  },
+  {
+    "name": "Lawndale",
+    "population": 31729,
+    "area_sqmi": 2
+  },
+  {
+    "name": "Leimert Park",
+    "population": 11782,
+    "area_sqmi": 1.2
+  },
+  {
+    "name": "Lennox",
+    "population": 22950,
+    "area_sqmi": 1.1
+  },
+  {
+    "name": "Leona Valley",
+    "population": 1374,
+    "area_sqmi": 15.3
+  },
+  {
+    "name": "Lincoln Heights",
+    "population": 26616,
+    "area_sqmi": 2.5
+  },
+  {
+    "name": "Littlerock",
+    "population": 1388,
+    "area_sqmi": 1.8
+  },
+  {
+    "name": "Lomita",
+    "population": 19984,
+    "area_sqmi": 1.9
+  },
+  {
+    "name": "Long Beach",
+    "population": 462731,
+    "area_sqmi": 52.1
+  },
+  {
+    "name": "Lopez/Kagel Canyons",
+    "population": 697,
+    "area_sqmi": 3.6
+  },
+  {
+    "name": "Los Feliz",
+    "population": 35238,
+    "area_sqmi": 2.6
+  },
+  {
+    "name": "Lynwood",
+    "population": 69899,
+    "area_sqmi": 4.9
+  },
+  {
+    "name": "Malibu",
+    "population": 12514,
+    "area_sqmi": 19.9
+  },
+  {
+    "name": "Manchester Square",
+    "population": 11594,
+    "area_sqmi": 1
+  },
+  {
+    "name": "Manhattan Beach",
+    "population": 34039,
+    "area_sqmi": 4
+  },
+  {
+    "name": "Mar Vista",
+    "population": 35492,
+    "area_sqmi": 2.9
+  },
+  {
+    "name": "Marina del Rey",
+    "population": 8302,
+    "area_sqmi": 1.5
+  },
+  {
+    "name": "Mayflower Village",
+    "population": 11649,
+    "area_sqmi": 1.2
+  },
+  {
+    "name": "Maywood",
+    "population": 28083,
+    "area_sqmi": 1.2
+  },
+  {
+    "name": "Mid-City",
+    "population": 52197,
+    "area_sqmi": 3.5
+  },
+  {
+    "name": "Mid-Wilshire",
+    "population": 41683,
+    "area_sqmi": 2.8
+  },
+  {
+    "name": "Mission Hills",
+    "population": 18237,
+    "area_sqmi": 3.2
+  },
+  {
+    "name": "Monrovia",
+    "population": 36817,
+    "area_sqmi": 13.9
+  },
+  {
+    "name": "Montebello",
+    "population": 61960,
+    "area_sqmi": 8.5
+  },
+  {
+    "name": "Montecito Heights",
+    "population": 16768,
+    "area_sqmi": 2.4
+  },
+  {
+    "name": "Monterey Park",
+    "population": 59933,
+    "area_sqmi": 7.7
+  },
+  {
+    "name": "Mount Washington",
+    "population": 12728,
+    "area_sqmi": 1.9
+  },
+  {
+    "name": "North El Monte",
+    "population": 3703,
+    "area_sqmi": 0.4
+  },
+  {
+    "name": "North Hills",
+    "population": 53095,
+    "area_sqmi": 5.3
+  },
+  {
+    "name": "North Hollywood",
+    "population": 77848,
+    "area_sqmi": 5.9
+  },
+  {
+    "name": "North Whittier",
+    "population": 4351,
+    "area_sqmi": 5.5
+  },
+  {
+    "name": "Northeast Antelope Valley",
+    "population": 4550,
+    "area_sqmi": 442
+  },
+  {
+    "name": "Northridge",
+    "population": 57561,
+    "area_sqmi": 9.5
+  },
+  {
+    "name": "Northwest Antelope Valley",
+    "population": 3343,
+    "area_sqmi": 213.9
+  },
+  {
+    "name": "Northwest Palmdale",
+    "population": 3125,
+    "area_sqmi": 5.8
+  },
+  {
+    "name": "Norwalk",
+    "population": 103223,
+    "area_sqmi": 9.8
+  },
+  {
+    "name": "Pacific Palisades",
+    "population": 23940,
+    "area_sqmi": 22.8
+  },
+  {
+    "name": "Pacoima",
+    "population": 75014,
+    "area_sqmi": 7.1
+  },
+  {
+    "name": "Palmdale",
+    "population": 117432,
+    "area_sqmi": 134.4
+  },
+  {
+    "name": "Palms",
+    "population": 42545,
+    "area_sqmi": 1.9
+  },
+  {
+    "name": "Palos Verdes Estates",
+    "population": 13340,
+    "area_sqmi": 4.7
+  },
+  {
+    "name": "Panorama City",
+    "population": 65766,
+    "area_sqmi": 3.6
+  },
+  {
+    "name": "Paramount",
+    "population": 55319,
+    "area_sqmi": 4.9
+  },
+  {
+    "name": "Pasadena",
+    "population": 134941,
+    "area_sqmi": 25.1
+  },
+  {
+    "name": "Pico Rivera",
+    "population": 63151,
+    "area_sqmi": 8.8
+  },
+  {
+    "name": "Pico-Robertson",
+    "population": 18019,
+    "area_sqmi": 1
+  },
+  {
+    "name": "Pico-Union",
+    "population": 42324,
+    "area_sqmi": 1.7
+  },
+  {
+    "name": "Playa del Rey",
+    "population": 9755,
+    "area_sqmi": 2.8
+  },
+  {
+    "name": "Playa Vista",
+    "population": 2416,
+    "area_sqmi": 1.3
+  },
+  {
+    "name": "Pomona",
+    "population": 150269,
+    "area_sqmi": 22.9
+  },
+  {
+    "name": "Porter Ranch",
+    "population": 24923,
+    "area_sqmi": 5.6
+  },
+  {
+    "name": "Quartz Hill",
+    "population": 9351,
+    "area_sqmi": 3.8
+  },
+  {
+    "name": "Ramona",
+    "population": 4053,
+    "area_sqmi": 3.6
+  },
+  {
+    "name": "Rancho Dominguez",
+    "population": 2526,
+    "area_sqmi": 2.7
+  },
+  {
+    "name": "Rancho Palos Verdes",
+    "population": 41301,
+    "area_sqmi": 13.4
+  },
+  {
+    "name": "Rancho Park",
+    "population": 4295,
+    "area_sqmi": 0.6
+  },
+  {
+    "name": "Redondo Beach",
+    "population": 63261,
+    "area_sqmi": 6.2
+  },
+  {
+    "name": "Reseda",
+    "population": 62174,
+    "area_sqmi": 5.9
+  },
+  {
+    "name": "Ridge Route",
+    "population": 1951,
+    "area_sqmi": 292.7
+  },
+  {
+    "name": "Rolling Hills",
+    "population": 3218,
+    "area_sqmi": 3.6
+  },
+  {
+    "name": "Rolling Hills Estates",
+    "population": 8334,
+    "area_sqmi": 3.8
+  },
+  {
+    "name": "Rosemead",
+    "population": 53280,
+    "area_sqmi": 5.2
+  },
+  {
+    "name": "Rowland Heights",
+    "population": 47524,
+    "area_sqmi": 13.2
+  },
+  {
+    "name": "San Dimas",
+    "population": 35064,
+    "area_sqmi": 15.6
+  },
+  {
+    "name": "San Fernando",
+    "population": 23534,
+    "area_sqmi": 2.4
+  },
+  {
+    "name": "San Gabriel",
+    "population": 39306,
+    "area_sqmi": 4.2
+  },
+  {
+    "name": "San Marino",
+    "population": 12973,
+    "area_sqmi": 3.8
+  },
+  {
+    "name": "San Pasqual",
+    "population": 2082,
+    "area_sqmi": 0.3
+  },
+  {
+    "name": "San Pedro",
+    "population": 80065,
+    "area_sqmi": 12.1
+  },
+  {
+    "name": "Santa Clarita",
+    "population": 157447,
+    "area_sqmi": 57.4
+  },
+  {
+    "name": "Santa Fe Springs",
+    "population": 17834,
+    "area_sqmi": 8.9
+  },
+  {
+    "name": "Santa Monica",
+    "population": 84084,
+    "area_sqmi": 8.6
+  },
+  {
+    "name": "Sawtelle",
+    "population": 35844,
+    "area_sqmi": 2.7
+  },
+  {
+    "name": "Shadow Hills",
+    "population": 13098,
+    "area_sqmi": 12.8
+  },
+  {
+    "name": "Sherman Oaks",
+    "population": 61166,
+    "area_sqmi": 9.1
+  },
+  {
+    "name": "Sierra Madre",
+    "population": 10578,
+    "area_sqmi": 3
+  },
+  {
+    "name": "Signal Hill",
+    "population": 9273,
+    "area_sqmi": 2.2
+  },
+  {
+    "name": "Silver Lake",
+    "population": 30972,
+    "area_sqmi": 2.7
+  },
+  {
+    "name": "South El Monte",
+    "population": 20935,
+    "area_sqmi": 2.9
+  },
+  {
+    "name": "South Gate",
+    "population": 96418,
+    "area_sqmi": 7.4
+  },
+  {
+    "name": "South Park",
+    "population": 30496,
+    "area_sqmi": 1.4
+  },
+  {
+    "name": "South Pasadena",
+    "population": 24303,
+    "area_sqmi": 3.4
+  },
+  {
+    "name": "South San Gabriel",
+    "population": 8100,
+    "area_sqmi": 1.4
+  },
+  {
+    "name": "South San Jose Hills",
+    "population": 20257,
+    "area_sqmi": 1.5
+  },
+  {
+    "name": "South Whittier",
+    "population": 55285,
+    "area_sqmi": 5.4
+  },
+  {
+    "name": "Southeast Antelope Valley",
+    "population": 5271,
+    "area_sqmi": 193
+  },
+  {
+    "name": "Stevenson Ranch",
+    "population": 8609,
+    "area_sqmi": 3.1
+  },
+  {
+    "name": "Studio City",
+    "population": 34034,
+    "area_sqmi": 6.3
+  },
+  {
+    "name": "Sun Valley",
+    "population": 75848,
+    "area_sqmi": 9.4
+  },
+  {
+    "name": "Sun Village",
+    "population": 9375,
+    "area_sqmi": 10.2
+  },
+  {
+    "name": "Sunland",
+    "population": 15316,
+    "area_sqmi": 4
+  },
+  {
+    "name": "Sylmar",
+    "population": 69499,
+    "area_sqmi": 12.5
+  },
+  {
+    "name": "Tarzana",
+    "population": 35502,
+    "area_sqmi": 8.8
+  },
+  {
+    "name": "Temple City",
+    "population": 33296,
+    "area_sqmi": 4
+  },
+  {
+    "name": "Toluca Lake",
+    "population": 7782,
+    "area_sqmi": 1.2
+  },
+  {
+    "name": "Topanga",
+    "population": 7425,
+    "area_sqmi": 19.2
+  },
+  {
+    "name": "Torrance",
+    "population": 137933,
+    "area_sqmi": 20.6
+  },
+  {
+    "name": "Tujunga",
+    "population": 26527,
+    "area_sqmi": 10
+  },
+  {
+    "name": "Tujunga Canyons",
+    "population": 2474,
+    "area_sqmi": 229.9
+  },
+  {
+    "name": "Unincorporated Catalina Island",
+    "population": 139,
+    "area_sqmi": 72.5
+  },
+  {
+    "name": "Unincorporated Santa Monica Mountains",
+    "population": 8929,
+    "area_sqmi": 89.3
+  },
+  {
+    "name": "Unincorporated Santa Susana Mountains",
+    "population": 4525,
+    "area_sqmi": 78.1
+  },
+  {
+    "name": "University Park",
+    "population": 23596,
+    "area_sqmi": 1.2
+  },
+  {
+    "name": "Val Verde",
+    "population": 1888,
+    "area_sqmi": 0.7
+  },
+  {
+    "name": "Valinda",
+    "population": 21568,
+    "area_sqmi": 2
+  },
+  {
+    "name": "Valley Glen",
+    "population": 59230,
+    "area_sqmi": 4.8
+  },
+  {
+    "name": "Valley Village",
+    "population": 24190,
+    "area_sqmi": 2.1
+  },
+  {
+    "name": "Van Nuys",
+    "population": 103770,
+    "area_sqmi": 9
+  },
+  {
+    "name": "Venice",
+    "population": 37705,
+    "area_sqmi": 3.2
+  },
+  {
+    "name": "Vermont Knolls",
+    "population": 20616,
+    "area_sqmi": 1.1
+  },
+  {
+    "name": "Vermont Square",
+    "population": 45284,
+    "area_sqmi": 2.5
+  },
+  {
+    "name": "Vermont Vista",
+    "population": 23291,
+    "area_sqmi": 1.6
+  },
+  {
+    "name": "Vermont-Slauson",
+    "population": 26797,
+    "area_sqmi": 1.4
+  },
+  {
+    "name": "Vernon",
+    "population": 94,
+    "area_sqmi": 5.2
+  },
+  {
+    "name": "Veterans Administration",
+    "population": 622,
+    "area_sqmi": 0.9
+  },
+  {
+    "name": "View Park-Windsor Hills",
+    "population": 11066,
+    "area_sqmi": 1.8
+  },
+  {
+    "name": "Vincent",
+    "population": 15032,
+    "area_sqmi": 1.5
+  },
+  {
+    "name": "Walnut",
+    "population": 30004,
+    "area_sqmi": 9
+  },
+  {
+    "name": "Walnut Park",
+    "population": 16180,
+    "area_sqmi": 0.7
+  },
+  {
+    "name": "Watts",
+    "population": 36815,
+    "area_sqmi": 2.1
+  },
+  {
+    "name": "West Adams",
+    "population": 21764,
+    "area_sqmi": 1.5
+  },
+  {
+    "name": "West Carson",
+    "population": 21010,
+    "area_sqmi": 2.3
+  },
+  {
+    "name": "West Compton",
+    "population": 5444,
+    "area_sqmi": 1.7
+  },
+  {
+    "name": "West Covina",
+    "population": 104893,
+    "area_sqmi": 16.1
+  },
+  {
+    "name": "West Hills",
+    "population": 38814,
+    "area_sqmi": 8.5
+  },
+  {
+    "name": "West Hollywood",
+    "population": 35716,
+    "area_sqmi": 1.9
+  },
+  {
+    "name": "West Los Angeles",
+    "population": 12659,
+    "area_sqmi": 1
+  },
+  {
+    "name": "West Puente Valley",
+    "population": 23866,
+    "area_sqmi": 1.9
+  },
+  {
+    "name": "West San Dimas",
+    "population": 309,
+    "area_sqmi": 0.3
+  },
+  {
+    "name": "West Whittier-Los Nietos",
+    "population": 25880,
+    "area_sqmi": 2.6
+  },
+  {
+    "name": "Westchester",
+    "population": 41500,
+    "area_sqmi": 10.8
+  },
+  {
+    "name": "Westlake",
+    "population": 103839,
+    "area_sqmi": 2.7
+  },
+  {
+    "name": "Westlake Village",
+    "population": 8663,
+    "area_sqmi": 5.6
+  },
+  {
+    "name": "Westmont",
+    "population": 31467,
+    "area_sqmi": 1.8
+  },
+  {
+    "name": "Westwood",
+    "population": 47916,
+    "area_sqmi": 3.7
+  },
+  {
+    "name": "Whittier",
+    "population": 83838,
+    "area_sqmi": 14.7
+  },
+  {
+    "name": "Willowbrook",
+    "population": 34336,
+    "area_sqmi": 3.8
+  },
+  {
+    "name": "Wilmington",
+    "population": 51517,
+    "area_sqmi": 9.1
+  },
+  {
+    "name": "Windsor Square",
+    "population": 5642,
+    "area_sqmi": 0.7
+  },
+  {
+    "name": "Winnetka",
+    "population": 46943,
+    "area_sqmi": 4.8
+  },
+  {
+    "name": "Woodland Hills",
+    "population": 59661,
+    "area_sqmi": 14.8
+  }
+]

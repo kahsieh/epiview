@@ -2,7 +2,7 @@ import React from 'react';
 import { ActivityIndicator, Alert, Button, Picker, StyleSheet, Text, View, Dimensions } from 'react-native';
 import MapView, { Polygon } from 'react-native-maps';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { compileData, evaluate, parseDate } from './epiview.js';
+import { compileData, compileLocalData, evaluate, parseDate } from './epiview.js';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -31,7 +31,7 @@ export default class App extends React.Component {
    * variables and triggers a recompute.
    */
   componentDidMount() {
-    compileData().then(res => {
+    compileLocalData().then(res => {
       const refDate = parseDate(res.maxDate);
       refDate.setDate(refDate.getDate() - 7);
       this.setState({
@@ -133,7 +133,7 @@ export default class App extends React.Component {
         <Picker.Item label='Total' value='total' />
         <Picker.Item label='Per case' value='per case' />
         <Picker.Item label='Per 1000 cap.' value='per 1000 cap.' />
-        <Picker.Item label='Per sq. km.' value='per sq. km.' />
+        <Picker.Item label='Per sq. mi.' value='per sq. mi.' />
       </Picker>;
     const modePicker =
       <Picker selectedValue={this.state.mode}
@@ -184,9 +184,15 @@ export default class App extends React.Component {
       latitudeDelta: 65.0,
       longitudeDelta: 65.0,
     };
+    const la = {
+      latitude: 34.0522,
+      longitude: -118.2437,
+      latitudeDelta: 1.5,
+      longitudeDelta: 1.5,
+    };
     return (
       <View style={styles.container}>
-        <MapView style={styles.map} initialRegion={usa}>
+        <MapView style={styles.map} initialRegion={la}>
           {this.state.polygons}
         </MapView>
         {!this.state.data ? (
