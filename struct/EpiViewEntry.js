@@ -40,8 +40,8 @@ export default class EpiViewEntry {
   complete() {
     return this.population !== 0 &&
            this.area !== 0 &&
-           this.bounds !== [] &&
-           this.counts !== {};
+           this.bounds.length !== 0 &&
+           Object.keys(this.counts).length !== 0;
   }
 
   /**

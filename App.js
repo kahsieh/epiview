@@ -1,55 +1,83 @@
 import React from "react";
-import { ActivityIndicator, Alert, Button, Picker, StyleSheet, Text, View, Dimensions } from "react-native";
-import MapView, { Polygon } from "react-native-maps";
+import { ActivityIndicator, Button, Picker, StyleSheet, Text, View, Dimensions } from "react-native";
+import MapView from "react-native-maps";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 import EpiViewTable from "./struct/EpiViewTable.js";
-import EpiViewTable_COVID19_UnitedStates from "./struct/EpiViewTable_COVID19_UnitedStates.js";
-import EpiViewTable_COVID19_LosAngeles from "./struct/EpiViewTable_COVID19_LosAngeles.js";
+import EpiViewTable_COVID19_UnitedStates, { UNITED_STATES } from "./struct/EpiViewTable_COVID19_UnitedStates.js";
+import EpiViewTable_COVID19_LosAngeles, { LOS_ANGELES } from "./struct/EpiViewTable_COVID19_LosAngeles.js";
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
+    this.table_us = new EpiViewTable();
+    this.table_la = new EpiViewTable();
+    this.table = this.table_us;
     this.state = {
-      // Data.
-      table: new EpiViewTable(),
+      // UI state.
+      region: UNITED_STATES,
       polygons: [],
+      recompute: false,
+      pickingRefDate: false,
+      pickingDate: false,
       // User-defined function (UDF).
       numerator: "new cases",
       denominator: "per 1000 cap.",
       mode: "on",
-      refDate: new Date(),  // initial value set in componentDidMount
-      date: new Date(),  // initial value set in componentDidMount
-      // UI state.
-      recompute: false,
-      refPicking: false,
-      picking: false,
+      refDate: new Date(),
+      date: new Date(),
     };
   }
 
   /**
-   * Downloads and compiles the data table. Sets data and data-dependent state
+   * Compiles the data tables. Sets data and data-dependent state
    * variables and triggers a recompute.
    */
   async componentDidMount() {
-    const res = await new EpiViewTable_COVID19_LosAngeles().compile();
-    const refDate = new Date(res.maxDate);
+    const promise_us = new EpiViewTable_COVID19_UnitedStates().compile();
+    const promise_la = new EpiViewTable_COVID19_LosAngeles().compile();
+    this.table_us = await promise_us;
+    this.table_la = await promise_la;
+    this.table = this.table_us;
+    const refDate = new Date(this.table.maxDate);
     refDate.setDate(refDate.getDate() - 7);
     this.setState({
-      table: res,
-      refDate: refDate,
-      date: new Date(res.maxDate),
       recompute: true,
+      refDate: refDate,
+      date: new Date(this.table.maxDate),
     });
   }
 
+  /**
+   * Returns the appropriate EpiViewTable for the region.
+   * 
+   * @param {!Object<string, number>} region A MapView Region.
+   * @return {!EpiViewTable} The corresponding EpiViewTable.
+   */
+  getTable(region) {
+    if (Math.abs(region.latitude - LOS_ANGELES.latitude) <
+          LOS_ANGELES.latitudeDelta / 2 &&
+        Math.abs(region.longitude - LOS_ANGELES.longitude) <
+          LOS_ANGELES.longitudeDelta / 2 &&
+        region.latitudeDelta <= LOS_ANGELES.latitudeDelta &&
+        region.longitudeDelta <= LOS_ANGELES.longitudeDelta) {
+      return this.table_la;
+    }
+    else {
+      return this.table_us;
+    }
+  }
+
   render() {
-    // Queue the recompute, if applicable.
-    if (this.state.recompute && this.state.table) {
+    // Queue a recompute, if needed.
+    const newTable = this.getTable(this.state.region);
+    const recompute = this.state.recompute || this.table != newTable;
+    if (recompute) {
       setTimeout(() => {
+        this.table = newTable;
         this.setState({
-          polygons: this.state.table.computePolygons(this.state),
-          recompute: false
+          polygons: newTable.computePolygons(this.state),
+          recompute: false,
         });
       }, 100);
     }
@@ -86,61 +114,51 @@ export default class App extends React.Component {
       </Picker>;
     const refDatePicker =
       <DateTimePicker value={this.state.refDate}
-                      minimumDate={this.state.table.minDate}
-                      maximumDate={this.state.table.maxDate}
+                      minimumDate={this.table.minDate}
+                      maximumDate={this.table.maxDate}
                       onChange={(e, value) => {
                         if (value) {
                           this.setState({
                             refDate: value,
-                            refPicking: false,
+                            pickingRefDate: false,
                             recompute: true,
                           });
                         }
                         else {
-                          this.setState({refPicking: false});
+                          this.setState({pickingRefDate: false});
                         }
                       }} />;
     const datePicker =
       <DateTimePicker value={this.state.date}
-                      minimumDate={this.state.table.minDate}
-                      maximumDate={this.state.table.maxDate}
+                      minimumDate={this.table.minDate}
+                      maximumDate={this.table.maxDate}
                       onChange={(e, value) => {
                         if (value) {
                           this.setState({
                             date: value,
-                            picking: false,
+                            pickingDate: false,
                             recompute: true,
                           });
                         }
                         else {
-                          this.setState({picking: false});
+                          this.setState({pickingDate: false});
                         }
                       }} />;
 
     // Create layout.
-    const usa = {
-      latitude: 37.0902,
-      longitude: -95.7129,
-      latitudeDelta: 65.0,
-      longitudeDelta: 65.0,
-    };
-    const la = {
-      latitude: 34.0522,
-      longitude: -118.2437,
-      latitudeDelta: 1.5,
-      longitudeDelta: 1.5,
-    };
     return (
       <View style={styles.container}>
-        <MapView style={styles.map} initialRegion={la}>
+        <MapView style={styles.map}
+                 initialRegion={this.state.region}
+                 onRegionChange={region => this.setState({region})}>
           {this.state.polygons}
         </MapView>
-        {!this.state.table ? (
+        {Object.keys(this.table.data).length == 0 ? (
           <View style={styles.toolbar}>
             <ActivityIndicator size="large" color="#ee6e73" />
             <Text>Downloading data...</Text>
           </View>
-        ) : this.state.recompute ? (
+        ) : recompute ? (
           <View style={styles.toolbar}>
             <ActivityIndicator size="large" color="#ee6e73" />
             <Text>Computing...</Text>
@@ -155,15 +173,15 @@ export default class App extends React.Component {
               {modePicker}
               {this.state.mode != "on" &&
                 <Button title={this.state.refDate.toLocaleDateString()}
-                        onPress={() => this.setState({refPicking: true})} />
+                        onPress={() => this.setState({pickingRefDate: true})} />
               }
-              {this.state.refPicking && refDatePicker}
+              {this.state.pickingRefDate && refDatePicker}
               {this.state.mode != "on" &&
                 <Text> – </Text>
               }
               <Button title={this.state.date.toLocaleDateString()}
-                      onPress={() => this.setState({picking: true})} />
-              {this.state.picking && datePicker}
+                      onPress={() => this.setState({pickingDate: true})} />
+              {this.state.pickingDate && datePicker}
             </View>
           </View>
         )}

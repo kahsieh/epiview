@@ -32,6 +32,16 @@ import rawBounds from "../assets/county-data/cb_2018_us_county_20m.json";
 const rawCountsUrl = "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv";
 
 /**
+ * United States general location.
+ */
+export const UNITED_STATES = {
+  latitude: 37.0902,
+  longitude: -95.7129,
+  latitudeDelta: 65.0,
+  longitudeDelta: 65.0,
+};
+
+/**
  * Holds a collection of EpiViewEntrys.
  * 
  * EpiViewTable_UnitedStates {

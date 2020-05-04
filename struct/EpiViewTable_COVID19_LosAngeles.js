@@ -31,6 +31,16 @@ import rawBounds from "../assets/local-data/la-county-neighborhoods-v6.json";
 const rawCountsUrl = "";
 
 /**
+ * Los Angeles general location.
+ */
+export const LOS_ANGELES = {
+  latitude: 34.0522,
+  longitude: -118.2437,
+  latitudeDelta: 2.0,
+  longitudeDelta: 2.0,
+};
+
+/**
  * Holds a collection of EpiViewEntrys.
  * 
  * EpiViewTable_UnitedStates {
@@ -68,7 +78,8 @@ export default class EpiViewTable_COVID19_LosAngeles extends EpiViewTable {
       // Get name and initialize.
       const name = row.name;
       if (!(name in this.data)) {
-        this.data[name] = new EpiViewEntry(name, "Los Angeles, California");
+        this.data[name] = new EpiViewEntry(name,
+                                           "Los Angeles County, California");
       }
       // Populate data.
       this.data[name].population = row.population;

@@ -6,6 +6,7 @@ Copyright (c) 2020 Kevin Hsieh. All Rights Reserved.
 */
 
 import React from "react";
+import { Alert } from "react-native";
 import { Polygon } from "react-native-maps";
 
 /**
