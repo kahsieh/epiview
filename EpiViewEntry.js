@@ -155,6 +155,16 @@ export default class EpiViewEntry {
 }
 
 /**
+ * Converts a GeoJSON coordinate to a LatLng.
+ *
+ * @param {!Array<string>} coord A GeoJSON coordinate.
+ * @return {!LatLng} The equivalent LatLng.
+ */
+export function parseCoord(coord) {
+  return {latitude: coord[1], longitude: coord[0]};
+}
+
+/**
  * Converts an ISO date string (YYYY-MM-DD) to a Date object in the local time
  * zone.
  *
