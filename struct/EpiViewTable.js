@@ -5,6 +5,9 @@ EpiViewTable.js
 Copyright (c) 2020 Kevin Hsieh. All Rights Reserved.
 */
 
+import React from "react";
+import { Polygon } from "react-native-maps";
+
 /**
  * Holds a collection of EpiViewEntrys.
  * 
@@ -50,5 +53,60 @@ export default class EpiViewTable {
    */
   addCounts() {
     throw "unsupported";
+  }
+
+  /**
+   * Computes Polygons to represent this EpiViewTable according to a user-
+   * defined function (UDF).
+   * 
+   * @param {!Object<string, *>} udf An object representing the UDF: {
+   *   "numerator": string,
+   *   "denominator": string,
+   *   "mode": string,
+   *   "refDate": ?Date,
+   *   "date": !Date,
+   * }
+   * @return {!Array<Polygon>} Polygons representing this EpiViewTable.
+   */
+  computePolygons(udf) {
+    // Find the maximum value of the UDF. If it's 0, change it to 1 so that we
+    // can divide by it. Then, create scale and round functions.
+    let fmax = Math.max(0, ...Object.values(this.data)
+                                    .map(entry => entry.evaluate(udf)));
+    if (fmax == 0) {
+      fmax = 1;
+    }
+    const scale = x => 0.6 * (1 - Math.pow(Math.E, -50 * (x / fmax)));
+    const round = x => Math.round(x * 100 + Number.EPSILON) / 100;
+
+    // Build the polygons array by looping through entries, skipping the ones
+    // that are incomplete.
+    let polygons = [];
+    for (const [key, entry] of Object.entries(this.data)) {
+      if (!entry.complete()) {
+        continue;
+      }
+
+      // Compute the entry's value and construct title, message, and color.
+      const value = entry.evaluate(udf);
+      const title = `${entry.name}, ${entry.region}`;
+      const message =
+        `${round(value)} ${udf.numerator} ${udf.denominator} ${udf.mode} ` +
+        (udf.mode != "on" ? udf.refDate.toLocaleDateString() + "–" : "") +
+        udf.date.toLocaleDateString();
+      const color = value > 0 ? `rgba(255, 0, 0, ${round(scale(value))})`
+                              : `rgba(0, 0, 255, ${round(scale(-value))})`;
+
+      // Create the polygons that make up the entry.
+      for (const [i, bound] of entry.bounds.entries()) {
+        polygons.push(<Polygon coordinates={bound}
+                        key={`${key}-${i}`}
+                        strokeWidth={0}
+                        fillColor={color}
+                        tappable={true}
+                        onPress={() => Alert.alert(title, message)} />);
+      }
+    }
+    return polygons;
   }
 }

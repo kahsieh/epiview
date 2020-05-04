@@ -14,13 +14,13 @@ export default class App extends React.Component {
       // Data.
       table: new EpiViewTable(),
       polygons: [],
-      // User-defined function.
+      // User-defined function (UDF).
       numerator: "new cases",
       denominator: "per 1000 cap.",
       mode: "on",
       refDate: new Date(),  // initial value set in componentDidMount
       date: new Date(),  // initial value set in componentDidMount
-      // Application state.
+      // UI state.
       recompute: false,
       refPicking: false,
       picking: false,
@@ -32,7 +32,7 @@ export default class App extends React.Component {
    * variables and triggers a recompute.
    */
   async componentDidMount() {
-    const res = await new EpiViewTable_COVID19_UnitedStates().compile();
+    const res = await new EpiViewTable_COVID19_LosAngeles().compile();
     const refDate = new Date(res.maxDate);
     refDate.setDate(refDate.getDate() - 7);
     this.setState({
@@ -43,72 +43,15 @@ export default class App extends React.Component {
     });
   }
 
-  /**
-   * Creates polygons according to the data table and user-defined function.
-   * Sets state.polygons and ends a recompute.
-   */
-  computePolygons() {
-    // Stop if there's no data. Find the maximum value of the user-defined
-    // function.
-    if (!this.state.table) {
-      return;
-    }
-    let fmax = Math.max(0, ...Object.values(this.state.table.data).map(county =>
-      county.evaluate(this.state.numerator, this.state.denominator,
-        this.state.date, this.state.refDate, this.state.mode)));
-
-    // If fmax is 0, change it to 1 so that we can divide by it. Then, use fmax
-    // to create scale and round functions.
-    if (fmax == 0) {
-      fmax = 1;
-    }
-    const scale = x => 0.6 * (1 - Math.pow(Math.E, -50 * (x / fmax)));
-    const round = x => Math.round(x * 100 + Number.EPSILON) / 100;
-
-    // Build the polygons array by looping through counties, skipping the ones
-    // that are mising data.
-    let polygons = [];
-    for (const [fips, county] of Object.entries(this.state.table.data)) {
-      if (!county.complete()) {
-        continue;
-      }
-
-      // Compute the county's value and construct title, message, and alpha.
-      const value = county.evaluate(this.state.numerator,
-        this.state.denominator, this.state.date, this.state.refDate,
-        this.state.mode);
-      const title = `${county.name}, ${county.region}`;
-      const message =
-        `${round(value)} ${this.state.numerator} ${this.state.denominator} ` +
-        `${this.state.mode} ` + (this.state.mode != "on" ?
-        this.state.refDate.toLocaleDateString() + "–" : "") +
-        this.state.date.toLocaleDateString();
-      let red = 255, blue = 0;
-      if (value < 0) {  // render negative values in blue
-        value = -value;
-        red = 0, blue = 255;
-      }
-      const alpha = scale(value);
-
-      // Create the polygons that make up the county.
-      for (const [i, bound] of county.bounds.entries()) {
-        polygons.push(<Polygon coordinates={bound}
-                        key={`${fips}-${i}`}
-                        strokeWidth={0}
-                        fillColor={`rgba(${red}, 0, ${blue}, ${round(alpha)})`}
-                        tappable={true}
-                        onPress={() => Alert.alert(title, message)} />);
-      }
-    }
-
-    // Update state.
-    this.setState({polygons: polygons, recompute: false});
-  }
-
   render() {
     // Queue the recompute, if applicable.
-    if (this.state.recompute) {
-      setTimeout(() => this.computePolygons(), 100);
+    if (this.state.recompute && this.state.table) {
+      setTimeout(() => {
+        this.setState({
+          polygons: this.state.table.computePolygons(this.state),
+          recompute: false
+        });
+      }, 100);
     }
 
     // Create picker components.

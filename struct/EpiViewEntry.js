@@ -49,27 +49,29 @@ export default class EpiViewEntry {
    * denominator, and mode on this entry for the given date (and possibly
    * a reference date, if the mode requires one).
    *
-   * @param {string} numerator The numerator of the UDF.
-   * @param {string} denominator The denominator of the UDF.
-   * @param {!Date} date The date on which to evaluate the UDF.
-   * @param {?Date} refDate The reference date with which to evaluate the UDF.
-   * @param {string} mode The mode of the UDF.
+   * @param {!Object<string, *>} udf An object representing the UDF: {
+   *   "numerator": string,
+   *   "denominator": string,
+   *   "mode": string,
+   *   "refDate": ?Date,
+   *   "date": !Date,
+   * }
    * @return {number} The result of the UDF.
    */
-  evaluate(numerator, denominator, date, refDate, mode) {
+  evaluate(udf) {
     if (!this.complete()) {
       return 0;
     }
-    switch (mode) {
+    switch (udf.mode) {
       case "on":
-        return this.evaluateBasic(numerator, denominator, date);
+        return this.evaluateBasic(udf.numerator, udf.denominator, udf.date);
       case "diff. btw.":
-        return this.evaluateBasic(numerator, denominator, date) -
-               this.evaluateBasic(numerator, denominator, refDate);
+        return this.evaluateBasic(udf.numerator, udf.denominator, udf.date) -
+               this.evaluateBasic(udf.numerator, udf.denominator, udf.refDate);
       case "avg.":
         let values = [];
         for (let d = new Date(date); d >= refDate; d.setDate(d.getDate() - 1)) {
-          values.push(this.evaluateBasic(numerator, denominator, d));
+          values.push(this.evaluateBasic(udf.numerator, udf.denominator, d));
         }
         return values.reduce((sum, v) => sum + v, 0) / values.length;
       default:
