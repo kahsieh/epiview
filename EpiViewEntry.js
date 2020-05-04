@@ -5,14 +5,31 @@ EpiViewEntry.js
 Copyright (c) 2020 Kevin Hsieh. All Rights Reserved.
 */
 
+/**
+ * Holds epidemic and related information about a particular area.
+ * 
+ * EpiViewEntry {
+ *   "name": string,
+ *   "region": string,
+ *   "population": number,
+ *   "area": number,  // Land area in square miles.
+ *   "bounds": !Array<Array<LatLng>>,
+ *   "counts": {
+ *     "date": {
+ *       "cases": number,
+ *       "deaths": number,
+ *     },
+ *   },
+ * }
+ */
 export default class EpiViewEntry {
   constructor(name, region) {
     this.name = name;
     this.region = region;
-    this.population = null;
-    this.area = null;
-    this.bounds = null;
-    this.counts = null;
+    this.population = 0;
+    this.area = 0;
+    this.bounds = [];
+    this.counts = {};
   }
 
   /**
@@ -21,10 +38,10 @@ export default class EpiViewEntry {
    * @return {boolean} Whether this entry is complete or not.
    */
   complete() {
-    return this.population !== null &&
-           this.area !== null &&
-           this.bounds !== null &&
-           this.counts !== null;
+    return this.population !== 0 &&
+           this.area !== 0 &&
+           this.bounds !== [] &&
+           this.counts !== {};
   }
 
   /**

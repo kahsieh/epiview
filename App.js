@@ -3,16 +3,14 @@ import { ActivityIndicator, Alert, Button, Picker, StyleSheet, Text, View, Dimen
 import MapView, { Polygon } from 'react-native-maps';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { compileData, compileLocalData } from './epiview.js';
-import { parseDate } from './EpiViewEntry.js';
+import EpiViewTable from './EpiViewTable.js';
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       // Data.
-      data: null,  // set in componentDidMount
-      minDate: new Date(),  // set in componentDidMount
-      maxDate: new Date(),  // set in componentDidMount
+      table: new EpiViewTable(),  // set in componentDidMount
       polygons: [],
       // User-defined function.
       numerator: 'new cases',
@@ -33,14 +31,12 @@ export default class App extends React.Component {
    */
   async componentDidMount() {
     const res = await compileData();
-    const refDate = parseDate(res.maxDate);
+    const refDate = new Date(res.maxDate);
     refDate.setDate(refDate.getDate() - 7);
     this.setState({
-      data: res.data,
-      minDate: parseDate(res.minDate),
-      maxDate: parseDate(res.maxDate),
+      table: res,
       refDate: refDate,
-      date: parseDate(res.maxDate),
+      date: new Date(res.maxDate),
       recompute: true,
     });
   }
@@ -52,10 +48,10 @@ export default class App extends React.Component {
   computePolygons() {
     // Stop if there's no data. Find the maximum value of the user-defined
     // function.
-    if (!this.state.data) {
+    if (!this.state.table) {
       return;
     }
-    let fmax = Math.max(0, ...Object.values(this.state.data).map(county =>
+    let fmax = Math.max(0, ...Object.values(this.state.table.data).map(county =>
       county.evaluate(this.state.numerator, this.state.denominator,
         this.state.date, this.state.refDate, this.state.mode)));
 
@@ -70,7 +66,7 @@ export default class App extends React.Component {
     // Build the polygons array by looping through counties, skipping the ones
     // that are mising data.
     let polygons = [];
-    for (const [fips, county] of Object.entries(this.state.data)) {
+    for (const [fips, county] of Object.entries(this.state.table.data)) {
       if (!county.complete()) {
         continue;
       }
@@ -145,8 +141,8 @@ export default class App extends React.Component {
       </Picker>;
     const refDatePicker =
       <DateTimePicker value={this.state.refDate}
-                      minimumDate={this.state.minDate}
-                      maximumDate={this.state.maxDate}
+                      minimumDate={this.state.table.minDate}
+                      maximumDate={this.state.table.maxDate}
                       onChange={(e, value) => {
                         if (value) {
                           this.setState({
@@ -161,8 +157,8 @@ export default class App extends React.Component {
                       }} />;
     const datePicker =
       <DateTimePicker value={this.state.date}
-                      minimumDate={this.state.minDate}
-                      maximumDate={this.state.maxDate}
+                      minimumDate={this.state.table.minDate}
+                      maximumDate={this.state.table.maxDate}
                       onChange={(e, value) => {
                         if (value) {
                           this.setState({
@@ -194,7 +190,7 @@ export default class App extends React.Component {
         <MapView style={styles.map} initialRegion={usa}>
           {this.state.polygons}
         </MapView>
-        {!this.state.data ? (
+        {!this.state.table ? (
           <View style={styles.toolbar}>
             <ActivityIndicator size="large" color="#ee6e73" />
             <Text>Downloading data...</Text>
