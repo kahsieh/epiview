@@ -1,12 +1,35 @@
 /*
 EpiView
-EpiViewTable_UnitedStates.js
+EpiViewTable_COVID19_UnitedStates.js
 
 Copyright (c) 2020 Kevin Hsieh. All Rights Reserved.
 */
 
 import EpiViewEntry, { parseCoord, parseDate } from "./EpiViewEntry.js";
 import EpiViewTable from "./EpiViewTable.js";
+
+/**
+ * United States County-level Population Data
+ * Source: U.S. Census Bureau (converted from CSV)
+ * Information: https://www.census.gov/programs-surveys/popest/data/data-sets.html
+ * Data: https://www2.census.gov/programs-surveys/popest/datasets/2010-2019/counties/totals/co-est2019-alldata.csv
+ */
+import rawPopulation from "../assets/county-data/co-est2019-alldata.json";
+
+/**
+ * United States County-level  Boundary Data
+ * Source: U.S. Census Bureau (converted from SHP)
+ * Information: https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html
+ * Data: https://www2.census.gov/geo/tiger/GENZ2018/shp/cb_2018_us_county_20m.zip
+ */
+import rawBounds from "../assets/county-data/cb_2018_us_county_20m.json";
+
+/**
+ * United States County-level Case Count Data
+ * Source: The New York Times
+ * Information: https://github.com/nytimes/covid-19-data
+ */
+const rawCountsUrl = "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv";
 
 /**
  * Holds a collection of EpiViewEntrys.
@@ -19,9 +42,20 @@ import EpiViewTable from "./EpiViewTable.js";
  *   "maxDate": Date,  // Corresponds to largest key in data.*.counts.
  * }
  */
-export default class EpiViewTable_UnitedStates extends EpiViewTable {
+export default class EpiViewTable_COVID19_UnitedStates extends EpiViewTable {
   constructor() {
     super();
+  }
+
+  /**
+   * Joins population, boundary, and case count data to produce a unified data
+   * table.
+   */
+  async compile() {
+    this.addPopulation(rawPopulation);
+    this.addBounds(rawBounds);
+    await this.addCounts(rawCountsUrl);
+    return this;
   }
 
   /**

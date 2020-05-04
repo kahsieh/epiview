@@ -3,8 +3,9 @@ import { ActivityIndicator, Alert, Button, Picker, StyleSheet, Text, View, Dimen
 import MapView, { Polygon } from "react-native-maps";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
-import EpiViewTable from "./EpiViewTable.js";
-import compileData from "./EpiViewManager.js";
+import EpiViewTable from "./struct/EpiViewTable.js";
+import EpiViewTable_COVID19_UnitedStates from "./struct/EpiViewTable_COVID19_UnitedStates.js";
+import EpiViewTable_COVID19_LosAngeles from "./struct/EpiViewTable_COVID19_LosAngeles.js";
 
 export default class App extends React.Component {
   constructor(props) {
@@ -31,7 +32,7 @@ export default class App extends React.Component {
    * variables and triggers a recompute.
    */
   async componentDidMount() {
-    const res = await compileData("Los Angeles");
+    const res = await new EpiViewTable_COVID19_UnitedStates().compile();
     const refDate = new Date(res.maxDate);
     refDate.setDate(refDate.getDate() - 7);
     this.setState({

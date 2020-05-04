@@ -24,6 +24,14 @@ export default class EpiViewTable {
   }
 
   /**
+   * Joins population, boundary, and case count data to produce a unified data
+   * table.
+   */
+  compile() {
+    throw "unsupported";
+  }
+
+  /**
    * Populates the table with population data.
    */
   addPopulation() {

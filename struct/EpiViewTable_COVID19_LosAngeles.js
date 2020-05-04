@@ -1,12 +1,34 @@
 /*
 EpiView
-EpiViewTable_LosAngeles.js
+EpiViewTable_COVID19_LosAngeles.js
 
 Copyright (c) 2020 Kevin Hsieh. All Rights Reserved.
 */
 
 import EpiViewEntry, { parseCoord, parseDate } from "./EpiViewEntry.js";
 import EpiViewTable from "./EpiViewTable.js";
+
+/**
+ * Los Angeles Neighborhood-level Population Data
+ * Source: L.A. Times (converted from HTML)
+ * Information: http://maps.latimes.com/
+ * Data: http://maps.latimes.com/neighborhoods/population/total/neighborhood/list/
+ */
+import rawPopulation from "../assets/local-data/la-county-population.json";
+
+/**
+ * Los Angeles Neighborhood-level Boundary Data
+ * Source: L.A. Times
+ * Information: http://boundaries.latimes.com/sets/
+ * Data: http://s3-us-west-2.amazonaws.com/boundaries.latimes.com/archive/1.0/boundary-set/la-county-neighborhoods-v6.geojson
+ */
+import rawBounds from "../assets/local-data/la-county-neighborhoods-v6.json";
+
+/**
+ * Los Angeles Neighborhood-level Case Count Data
+ * Source: ?
+ */
+const rawCountsUrl = "";
 
 /**
  * Holds a collection of EpiViewEntrys.
@@ -19,9 +41,20 @@ import EpiViewTable from "./EpiViewTable.js";
  *   "maxDate": Date,  // Corresponds to largest key in data.*.counts.
  * }
  */
-export default class EpiViewTable_LosAngeles extends EpiViewTable {
+export default class EpiViewTable_COVID19_LosAngeles extends EpiViewTable {
   constructor() {
     super();
+  }
+
+  /**
+   * Joins population, boundary, and case count data to produce a unified data
+   * table.
+   */
+  async compile() {
+    this.addPopulation(rawPopulation);
+    this.addBounds(rawBounds);
+    await this.addCounts(rawCountsUrl);
+    return this;
   }
 
   /**
