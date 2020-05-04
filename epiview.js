@@ -5,6 +5,8 @@ epiview.js
 Copyright (c) 2020 Kevin Hsieh. All Rights Reserved.
 */
 
+import EpiViewEntry from './EpiViewEntry.js';
+
 // -----------------------------------------------------------------------------
 // DATA SOURCES
 // -----------------------------------------------------------------------------
@@ -49,120 +51,6 @@ import rawLocalPopulation from './assets/local-data/la-county-population.json';
 import rawLocalBounds from './assets/local-data/la-county-neighborhoods-v6.json';
 
 // -----------------------------------------------------------------------------
-// COMPUTATION
-// -----------------------------------------------------------------------------
-
-/**
- * Evaluates a user-defined function (UDF) specified by a numerator,
- * denominator, and mode on the given county for the given date (and possibly
- * a reference date if the mode requires one).
- *
- * @param {!Object<string, *>} county Data table entry for a county.
- * @param {!Date} date The date on which to evaluate the UDF.
- * @param {string} numerator The numerator of the UDF.
- * @param {string} denominator The denominator of the UDF.
- * @param {string} mode The mode of the UDF.
- * @param {?Date} refDate The reference date with which to evaluate the UDF.
- */
-export function evaluate(county, date, numerator, denominator, mode, refDate) {
-  // Stop if the county is missing data.
-  if (!('population' in county) ||
-      !('bounds' in county) ||
-      !('counts' in county)) {
-    return 0;
-  }
-
-  switch (mode) {
-    case 'on':
-      return evaluateBasic(county, date, numerator, denominator);
-    case 'diff. btw.':
-      return evaluateBasic(county, date, numerator, denominator) -
-             evaluateBasic(county, refDate, numerator, denominator);
-    case 'avg.':
-      let values = [];
-      for (let d = new Date(date); d >= refDate; d.setDate(d.getDate() - 1)) {
-        values.push(evaluateBasic(county, d, numerator, denominator));
-      }
-      return values.reduce((sum, v) => sum + v, 0) / values.length;
-    default:
-      return 0;  // shouldn't happen
-  }
-}
-
-/**
- * Evalutes a basic user-defined function (UDF) specified by a numerator and a
- * denominator on the given county for the given date.
- *
- * @param {!Object<string, *>} county Data table entry for a county.
- * @param {!Date} date The date on which to evaluate the basic UDF.
- * @param {string} numerator The numerator of the basic UDF.
- * @param {string} denominator The denominator of the basic UDF.
- * @return {number} The result of the basic UDF.
- */
-function evaluateBasic(county, date, numerator, denominator) {
-  // Find a key (date string) on or before to the requested date. Stop if none
-  // is available.
-  const dateStr = Object.keys(county.counts)
-                        .reverse()
-                        .find(k => parseDate(k) <= date);
-  if (!dateStr) {
-    return 0;
-  }
-
-  // Set the numerator and denominator values.
-  let num, den;
-  switch (numerator) {
-    case 'cases':
-      num = county.counts[dateStr].cases;
-      break;
-    case 'new cases': {
-      num = county.counts[dateStr].cases;
-      // Subtract the previous day's number, if it's available.
-      let prevDate = new Date(date);
-      prevDate.setDate(prevDate.getDate() - 1);
-      let prevDateStr = Object.keys(county.counts)
-                              .reverse()
-                              .find(k => parseDate(k) <= prevDate);
-      if (prevDateStr) {
-        num -= county.counts[prevDateStr].cases;
-      }
-      break;
-    }
-    case 'deaths':
-      num = county.counts[dateStr].deaths;
-      break;
-    case 'new deaths': {
-      num = county.counts[dateStr].deaths;
-      // Subtract the previous day's number, if it's available.
-      let prevDate = new Date(date);
-      prevDate.setDate(prevDate.getDate() - 1);
-      let prevDateStr = Object.keys(county.counts)
-                              .reverse()
-                              .find(k => parseDate(k) <= prevDate);
-      if (prevDateStr) {
-        num -= county.counts[prevDateStr].deaths;
-      }
-      break;
-    }
-  }
-  switch (denominator) {
-    case 'total':
-      den = 1;
-      break;
-    case 'per case':
-      den = county.counts[dateStr].cases;
-      break;
-    case 'per 1000 cap.':
-      den = county.population / 1e3;
-      break;
-    case 'per sq. mi.':
-      den = county.landArea;
-      break;
-  }
-  return num / den;
-}
-
-// -----------------------------------------------------------------------------
 // COUNTY-LEVEL DATA COMPILATION
 // -----------------------------------------------------------------------------
 
@@ -176,9 +64,9 @@ function evaluateBasic(county, date, numerator, denominator) {
  *     {
  *       fips: {
  *         'name': string,
- *         'state': string,
+ *         'region': string,
  *         'population': string,
- *         'landArea': number,
+ *         'area': number,
  *         'bounds': !Array<Array<LatLng>>,
  *         'counts': {
  *           'date': {
@@ -210,17 +98,19 @@ function addPopulation(data) {
       data[fips] = {};
     }
     // Populate data.
-    Object.assign(data[fips], {
-      name: row.CTYNAME,
-      state: row.STNAME,
-      population: row.POPESTIMATE2018,
-    });
+    data[fips] = new EpiViewEntry(row.CTYNAME, row.STNAME);
+    data[fips].population = row.POPESTIMATE2018;
+    // Object.assign(data[fips], {
+    //   name: row.CTYNAME,
+    //   state: row.STNAME,
+    //   population: row.POPESTIMATE2018,
+    // });
   }
 
   // Special handling for New York City.
   const nyc = '36000';
   if (!(nyc in data)) {
-    data[nyc] = {};
+    data[nyc] = new EpiViewEntry('', '');
   }
   Object.assign(data[nyc], {
     name: 'New York City',
@@ -240,14 +130,14 @@ function addBounds(data) {
     // Get FIPS code and initialize.
     const fips = feature.properties.GEOID;
     if (!(fips in data)) {
-      data[fips] = {};
+      data[fips] = new EpiViewEntry('', '');
     }
-    if (!('bounds' in data[fips])) {
+    if (!data[fips].bounds) {
       data[fips].bounds = [];
     }
     // Populate data. Convert land area from square meters to square miles.
     // A square mile is defined as exactly 2589988.110336 square meters.
-    data[fips].landArea = (data[fips].landArea || 0)
+    data[fips].area = (data[fips].area || 0)
       + feature.properties.ALAND / 2589988.110336;
     switch (feature.geometry.type) {
       case 'Polygon':
@@ -265,13 +155,13 @@ function addBounds(data) {
   // Special handling for New York City.
   const nyc = '36000';
   if (!(nyc in data)) {
-    data[fips] = {};
+    data[fips] = new EpiViewEntry('', '');
   }
   if (!('bounds' in data[nyc])) {
     data[nyc].bounds = [];
   }
-  data[nyc].landArea = BOROUGHS.reduce(
-    (total, fips) => total + data[fips].landArea);
+  data[nyc].area = BOROUGHS.reduce(
+    (total, fips) => total + data[fips].area);
   data[nyc].bounds = BOROUGHS.reduce(
     (total, fips) => total.concat(data[fips].bounds), []);
 }
@@ -291,9 +181,9 @@ async function addCounts(data) {
     // Get FIPS code and initialize.
     const fips = row.county == 'New York City' ? '36000' : row.fips;
     if (!(fips in data)) {
-      data[fips] = {};
+      data[fips] = new EpiViewEntry('', '');
     }
-    if (!('counts' in data[fips])) {
+    if (!data[fips].counts) {
       data[fips].counts = {};
     }
     // Populate data.
@@ -338,7 +228,7 @@ function addLocalPopulation(data) {
     // Populate data.
     Object.assign(data[name], {
       population: row.population,
-      landArea: row.area_sqmi,
+      area: row.area_sqmi,
     });
   }
 }
@@ -419,18 +309,6 @@ function parseCsv(csv) {
   const data = lines.slice(1).map(row => Object.fromEntries(
     row.split(',').map((value, j) => [header[j], value])));
   return data;
-}
-
-/**
- * Converts an ISO date string (YYYY-MM-DD) to a Date object in the local time
- * zone.
- *
- * @param {string} dateStr ISO date string (YYYY-MM-DD).
- * @return {!Date} Corresponding Date object in the local time zone.
- */
-export function parseDate(dateStr) {
-  const parts = dateStr.split('-');
-  return new Date(parts[0], parts[1] - 1, parts[2]);
 }
 
 // -----------------------------------------------------------------------------

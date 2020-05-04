@@ -2,7 +2,8 @@ import React from 'react';
 import { ActivityIndicator, Alert, Button, Picker, StyleSheet, Text, View, Dimensions } from 'react-native';
 import MapView, { Polygon } from 'react-native-maps';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { compileData, compileLocalData, evaluate, parseDate } from './epiview.js';
+import { compileData, compileLocalData } from './epiview.js';
+import { parseDate } from './EpiViewEntry.js';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -30,18 +31,17 @@ export default class App extends React.Component {
    * Downloads and compiles the data table. Sets data and data-dependent state
    * variables and triggers a recompute.
    */
-  componentDidMount() {
-    compileLocalData().then(res => {
-      const refDate = parseDate(res.maxDate);
-      refDate.setDate(refDate.getDate() - 7);
-      this.setState({
-        data: res.data,
-        minDate: parseDate(res.minDate),
-        maxDate: parseDate(res.maxDate),
-        refDate: refDate,
-        date: parseDate(res.maxDate),
-        recompute: true,
-      });
+  async componentDidMount() {
+    const res = await compileData();
+    const refDate = parseDate(res.maxDate);
+    refDate.setDate(refDate.getDate() - 7);
+    this.setState({
+      data: res.data,
+      minDate: parseDate(res.minDate),
+      maxDate: parseDate(res.maxDate),
+      refDate: refDate,
+      date: parseDate(res.maxDate),
+      recompute: true,
     });
   }
 
@@ -56,8 +56,8 @@ export default class App extends React.Component {
       return;
     }
     let fmax = Math.max(0, ...Object.values(this.state.data).map(county =>
-      evaluate(county, this.state.date, this.state.numerator,
-        this.state.denominator, this.state.mode, this.state.refDate)));
+      county.evaluate(this.state.numerator, this.state.denominator,
+        this.state.date, this.state.refDate, this.state.mode)));
 
     // If fmax is 0, change it to 1 so that we can divide by it. Then, use fmax
     // to create scale and round functions.
@@ -71,16 +71,15 @@ export default class App extends React.Component {
     // that are mising data.
     let polygons = [];
     for (const [fips, county] of Object.entries(this.state.data)) {
-      if (!('population' in county) ||
-          !('bounds' in county) ||
-          !('counts' in county)) {
+      if (!county.complete()) {
         continue;
       }
 
       // Compute the county's value and construct title, message, and alpha.
-      const value = evaluate(county,this.state.date, this.state.numerator,
-        this.state.denominator, this.state.mode, this.state.refDate);
-      const title = `${county.name}, ${county.state}`;
+      const value = county.evaluate(this.state.numerator,
+        this.state.denominator, this.state.date, this.state.refDate,
+        this.state.mode);
+      const title = `${county.name}, ${county.region}`;
       const message =
         `${round(value)} ${this.state.numerator} ${this.state.denominator} ` +
         `${this.state.mode} ` + (this.state.mode != 'on' ?
@@ -192,7 +191,7 @@ export default class App extends React.Component {
     };
     return (
       <View style={styles.container}>
-        <MapView style={styles.map} initialRegion={la}>
+        <MapView style={styles.map} initialRegion={usa}>
           {this.state.polygons}
         </MapView>
         {!this.state.data ? (
