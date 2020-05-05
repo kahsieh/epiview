@@ -15,14 +15,14 @@ export default class App extends React.Component {
     this.table = this.table_us;
     this.state = {
       // UI state.
-      region: LOS_ANGELES,
+      region: UNITED_STATES,  // currently used as initial region
       polygons: [],
       recompute: false,
       pickingRefDate: false,
       pickingDate: false,
       // User-defined function (UDF).
-      numerator: "new cases",
-      denominator: "per 1000 cap.",
+      numerator: "daily new cases (U.S.)",
+      denominator: "per 1000 population",
       mode: "on",
       refDate: new Date(),
       date: new Date(),
@@ -70,13 +70,10 @@ export default class App extends React.Component {
 
   render() {
     // Queue a recompute, if needed.
-    const newTable = this.getTable(this.state.region);
-    const recompute = this.state.recompute || this.table != newTable;
-    if (recompute) {
+    if (this.state.recompute) {
       setTimeout(() => {
-        this.table = newTable;
         this.setState({
-          polygons: newTable.computePolygons(this.state),
+          polygons: this.table.computePolygons(this.state),
           recompute: false,
         });
       }, 100);
@@ -86,12 +83,22 @@ export default class App extends React.Component {
     const numPicker =
       <Picker selectedValue={this.state.numerator}
               style={{ width: 180 }}
-              onValueChange={(value, index) =>
-                this.setState({numerator: value, recompute: true})}>
-        <Picker.Item label="Cases" value="cases" />
-        <Picker.Item label="New cases" value="new cases" />
-        <Picker.Item label="Deaths" value="deaths" />
-        <Picker.Item label="New deaths" value="new deaths" />
+              onValueChange={(value, index) => {
+                this.table = index < 4 ? this.table_us : this.table_la;
+                this.setState({numerator: value, recompute: true});
+              }}>
+        <Picker.Item label="U.S. Cases"
+                     value="cases (U.S.)" />
+        <Picker.Item label="U.S. Daily new cases"
+                     value="daily new cases (U.S.)" />
+        <Picker.Item label="U.S. Deaths"
+                     value="deaths (U.S.)" />
+        <Picker.Item label="U.S. Daily new deaths"
+                     value="daily new deaths (U.S.)" />
+        <Picker.Item label="L.A. Cases"
+                     value="cases (L.A.)" />
+        <Picker.Item label="L.A. Daily new cases"
+                     value="daily new cases (L.A.)" />
       </Picker>;
     const denPicker =
       <Picker selectedValue={this.state.denominator}
@@ -100,7 +107,7 @@ export default class App extends React.Component {
                 this.setState({denominator: value, recompute: true})}>
         <Picker.Item label="Total" value="total" />
         <Picker.Item label="Per case" value="per case" />
-        <Picker.Item label="Per 1000 cap." value="per 1000 cap." />
+        <Picker.Item label="Per 1000 pop." value="per 1000 population" />
         <Picker.Item label="Per sq. mi." value="per sq. mi." />
       </Picker>;
     const modePicker =
@@ -109,8 +116,8 @@ export default class App extends React.Component {
               onValueChange={(value, index) =>
                 this.setState({mode: value, recompute: true})}>
         <Picker.Item label="On" value="on" />
-        <Picker.Item label="Diff. btw." value="diff. btw." />
-        <Picker.Item label="Avg." value="avg." />
+        <Picker.Item label="Diff. btw." value="differenced between" />
+        <Picker.Item label="Avg." value="averaged" />
       </Picker>;
     const refDatePicker =
       <DateTimePicker value={this.state.refDate}
@@ -149,8 +156,7 @@ export default class App extends React.Component {
     return (
       <View style={styles.container}>
         <MapView style={styles.map}
-                 initialRegion={this.state.region}
-                 onRegionChange={region => this.setState({region})}>
+                 initialRegion={this.state.region}>
           {this.state.polygons}
         </MapView>
         {Object.keys(this.table.data).length == 0 ? (
@@ -158,7 +164,7 @@ export default class App extends React.Component {
             <ActivityIndicator size="large" color="#ee6e73" />
             <Text>Downloading data...</Text>
           </View>
-        ) : recompute ? (
+        ) : this.state.recompute ? (
           <View style={styles.toolbar}>
             <ActivityIndicator size="large" color="#ee6e73" />
             <Text>Computing...</Text>

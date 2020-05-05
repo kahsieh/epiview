@@ -65,12 +65,13 @@ export default class EpiViewEntry {
     switch (udf.mode) {
       case "on":
         return this.evaluateBasic(udf.numerator, udf.denominator, udf.date);
-      case "diff. btw.":
+      case "differenced between":
         return this.evaluateBasic(udf.numerator, udf.denominator, udf.date) -
                this.evaluateBasic(udf.numerator, udf.denominator, udf.refDate);
-      case "avg.":
+      case "averaged":
         let values = [];
-        for (let d = new Date(date); d >= refDate; d.setDate(d.getDate() - 1)) {
+        for (let d = new Date(udf.date); d >= udf.refDate;
+             d.setDate(d.getDate() - 1)) {
           values.push(this.evaluateBasic(udf.numerator, udf.denominator, d));
         }
         return values.reduce((sum, v) => sum + v, 0) / values.length;
@@ -100,11 +101,11 @@ export default class EpiViewEntry {
 
     // Find the numerator and denominator values.
     let nval, dval;
-    switch (numerator) {
+    switch (numerator.replace(/ \(.*\)/, "")) {
       case "cases":
         nval = this.counts[dateStr].cases;
         break;
-      case "new cases": {
+      case "daily new cases": {
         nval = this.counts[dateStr].cases;
         // Subtract the previous day's number, if it's available.
         let prevDate = new Date(date);
@@ -120,7 +121,7 @@ export default class EpiViewEntry {
       case "deaths":
         nval = this.counts[dateStr].deaths;
         break;
-      case "new deaths": {
+      case "daily new deaths": {
         nval = this.counts[dateStr].deaths;
         // Subtract the previous day's number, if it's available.
         let prevDate = new Date(date);
@@ -143,7 +144,7 @@ export default class EpiViewEntry {
       case "per case":
         dval = this.counts[dateStr].cases;
         break;
-      case "per 1000 cap.":
+      case "per 1000 population":
         dval = this.population / 1e3;
         break;
       case "per sq. mi.":

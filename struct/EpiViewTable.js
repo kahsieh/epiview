@@ -92,7 +92,8 @@ export default class EpiViewTable {
       const value = entry.evaluate(udf);
       const title = `${entry.name}, ${entry.region}`;
       const message =
-        `${round(value)} ${udf.numerator} ${udf.denominator} ${udf.mode} ` +
+        `${round(value)} ${udf.numerator.replace(/ \(.*\)/, "")} ` +
+        `${udf.denominator} ${udf.mode} ` +
         (udf.mode != "on" ? udf.refDate.toLocaleDateString() + "–" : "") +
         udf.date.toLocaleDateString();
       const color = value > 0 ? `rgba(255, 0, 0, ${round(scale(value))})`
