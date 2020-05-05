@@ -5,11 +5,11 @@ EpiViewTable_COVID19_LosAngeles.js
 Copyright (c) 2020 Kevin Hsieh. All Rights Reserved.
 */
 
-import EpiViewEntry, { parseCoord, parseDate } from "./EpiViewEntry.js";
+import EpiViewEntry, { parseCoord, parseCsv, parseDate } from "./EpiViewEntry.js";
 import EpiViewTable from "./EpiViewTable.js";
 
 /**
- * Los Angeles Neighborhood-level Population Data
+ * Los Angeles Neighborhood-level Population (and Area) Data
  * Source: L.A. Times (converted from HTML)
  * Information: http://maps.latimes.com/
  * Data: http://maps.latimes.com/neighborhoods/population/total/neighborhood/list/
@@ -26,9 +26,11 @@ import rawBounds from "../assets/local-data/la-county-neighborhoods-v6.json";
 
 /**
  * Los Angeles Neighborhood-level Case Count Data
- * Source: ?
+ * Source: L.A. Times 
+ * Information: https://github.com/datadesk/california-coronavirus-data
+ * Data: https://raw.githubusercontent.com/datadesk/california-coronavirus-data/master/latimes-place-totals.csv
  */
-const rawCountsUrl = "";
+const rawCountsUrl = "https://raw.githubusercontent.com/datadesk/california-coronavirus-data/master/latimes-place-totals.csv";
 
 /**
  * Los Angeles general location.
@@ -36,8 +38,8 @@ const rawCountsUrl = "";
 export const LOS_ANGELES = {
   latitude: 34.0522,
   longitude: -118.2437,
-  latitudeDelta: 2.0,
-  longitudeDelta: 2.0,
+  latitudeDelta: 1.5,
+  longitudeDelta: 1.5,
 };
 
 /**
@@ -122,14 +124,33 @@ export default class EpiViewTable_COVID19_LosAngeles extends EpiViewTable {
    * @param {string} rawCountsUrl URL of raw case count data.
    */
   async addCounts(rawCountsUrl) {
-    let minDate = "2020-05-02", maxDate = "2020-05-02";
-    for (const entry of Object.values(this.data)) {
-      entry.counts = {
-        "2020-05-02": {
-          cases: 1,
-          deaths: 1,
-        },
-      };
+    const rawCounts = await fetch(rawCountsUrl).then(res => res.text())
+                                               .then(parseCsv);
+    let minDate = "", maxDate = "";
+    for (const row of rawCounts) {
+      if (row.county !== "Los Angeles") {
+        continue;
+      }
+      // Get name and initialize.
+      const name = row.place;
+      if (!(name in this.data)) {
+        this.data[name] = new EpiViewEntry(row.county,
+                                           "Los Angeles County, California");
+      }
+      // Populate data.
+      if (!(row.date in this.data[name].counts)) {
+        this.data[name].counts[row.date] = {
+          cases: 0,
+          deaths: 0,
+        };
+      }
+      this.data[name].counts[row.date].cases += +row.confirmed_cases;
+      if (minDate === "" || row.date < minDate) {
+        minDate = row.date;
+      }
+      if (maxDate === "" || row.date > maxDate) {
+        maxDate = row.date;
+      }
     }
     this.minDate = parseDate(minDate);
     this.maxDate = parseDate(maxDate);

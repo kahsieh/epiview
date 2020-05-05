@@ -167,6 +167,20 @@ export function parseCoord(coord) {
 }
 
 /**
+ * Converts a .csv file to an object representation.
+ *
+ * @param {string} csv Body of .csv file, starting with a header row.
+ * @return {!Array<Object>} Array of rows, each represented as an object.
+ */
+export function parseCsv(csv) {
+  const lines = csv.split("\n").filter(line => line !== "");
+  const header = lines[0].split(",");
+  const data = lines.slice(1).map(row => Object.fromEntries(
+    row.split(",").map((value, j) => [header[j], value])));
+  return data;
+}
+
+/**
  * Converts an ISO date string (YYYY-MM-DD) to a Date object in the local time
  * zone.
  *

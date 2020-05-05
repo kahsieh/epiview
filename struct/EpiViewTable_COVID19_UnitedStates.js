@@ -5,7 +5,7 @@ EpiViewTable_COVID19_UnitedStates.js
 Copyright (c) 2020 Kevin Hsieh. All Rights Reserved.
 */
 
-import EpiViewEntry, { parseCoord, parseDate } from "./EpiViewEntry.js";
+import EpiViewEntry, { parseCoord, parseCsv, parseDate } from "./EpiViewEntry.js";
 import EpiViewTable from "./EpiViewTable.js";
 
 /**
@@ -17,7 +17,7 @@ import EpiViewTable from "./EpiViewTable.js";
 import rawPopulation from "../assets/county-data/co-est2019-alldata.json";
 
 /**
- * United States County-level  Boundary Data
+ * United States County-level Boundary (and Area) Data
  * Source: U.S. Census Bureau (converted from SHP)
  * Information: https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html
  * Data: https://www2.census.gov/geo/tiger/GENZ2018/shp/cb_2018_us_county_20m.zip
@@ -147,7 +147,7 @@ export default class EpiViewTable_COVID19_UnitedStates extends EpiViewTable {
   async addCounts(rawCountsUrl) {
     const rawCounts = await fetch(rawCountsUrl).then(res => res.text())
                                                .then(parseCsv);
-    let minDate = '', maxDate = '';
+    let minDate = "", maxDate = "";
     for (const row of rawCounts) {
       // Get FIPS code and initialize.
       const fips = row.county == "New York City" ? "36000" : row.fips;
@@ -159,30 +159,16 @@ export default class EpiViewTable_COVID19_UnitedStates extends EpiViewTable {
         cases: +row.cases,
         deaths: +row.deaths,
       };
-      if (minDate === '' || row.date < minDate) {
+      if (minDate === "" || row.date < minDate) {
         minDate = row.date;
       }
-      if (maxDate === '' || row.date > maxDate) {
+      if (maxDate === "" || row.date > maxDate) {
         maxDate = row.date;
       }
     }
     this.minDate = parseDate(minDate);
     this.maxDate = parseDate(maxDate);
   }
-}
-
-/**
- * Converts a .csv file to an object representation.
- *
- * @param {string} csv Body of .csv file, starting with a header row.
- * @return {!Array<Object>} Array of rows, each represented as an object.
- */
-function parseCsv(csv) {
-  const lines = csv.split("\n");
-  const header = lines[0].split(",");
-  const data = lines.slice(1).map(row => Object.fromEntries(
-    row.split(",").map((value, j) => [header[j], value])));
-  return data;
 }
 
 /**

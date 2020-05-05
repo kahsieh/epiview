@@ -15,7 +15,7 @@ export default class App extends React.Component {
     this.table = this.table_us;
     this.state = {
       // UI state.
-      region: UNITED_STATES,
+      region: LOS_ANGELES,
       polygons: [],
       recompute: false,
       pickingRefDate: false,
