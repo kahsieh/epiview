@@ -7,7 +7,7 @@ Copyright (c) 2020 Kevin Hsieh. All Rights Reserved.
 
 /**
  * Holds epidemic and related information about a particular area.
- * 
+ *
  * EpiViewEntry {
  *   "name": string,
  *   "region": string,
@@ -34,7 +34,7 @@ export default class EpiViewEntry {
 
   /**
    * Checks whether this entry is complete or not.
-   * 
+   *
    * @return {boolean} Whether this entry is complete or not.
    */
   complete() {

@@ -11,7 +11,7 @@ import { Polygon } from "react-native-maps";
 
 /**
  * Holds a collection of EpiViewEntrys.
- * 
+ *
  * EpiViewTable {
  *   "data": {
  *     key: EpiViewEntry,
@@ -59,7 +59,7 @@ export default class EpiViewTable {
   /**
    * Computes Polygons to represent this EpiViewTable according to a user-
    * defined function (UDF).
-   * 
+   *
    * @param {!Object<string, *>} udf An object representing the UDF: {
    *   "numerator": string,
    *   "denominator": string,
@@ -74,7 +74,7 @@ export default class EpiViewTable {
     // can divide by it. Then, create scale and round functions.
     let fmax = Math.max(0, ...Object.values(this.data)
                                     .map(entry => entry.evaluate(udf)));
-    if (fmax == 0) {
+    if (fmax === 0) {
       fmax = 1;
     }
     const scale = x => 0.6 * (1 - Math.pow(Math.E, -50 * (x / fmax)));

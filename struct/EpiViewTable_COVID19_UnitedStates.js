@@ -43,7 +43,7 @@ export const UNITED_STATES = {
 
 /**
  * Holds a collection of EpiViewEntrys.
- * 
+ *
  * EpiViewTable_UnitedStates {
  *   "data": {
  *     key: EpiViewEntry,
@@ -106,7 +106,7 @@ export default class EpiViewTable_COVID19_UnitedStates extends EpiViewTable {
       const fips = feature.properties.GEOID;
       if (!(fips in this.data)) {
         this.data[fips] = new EpiViewEntry(feature.properties.NAME,
-                                      "State " + feature.properties.STATEFP);
+                                           feature.properties.STATEFP);
       }
       // Populate data. Convert land area from square meters to square miles.
       // A square mile is defined as exactly 2589988.110336 square meters.
@@ -150,7 +150,7 @@ export default class EpiViewTable_COVID19_UnitedStates extends EpiViewTable {
     let minDate = "", maxDate = "";
     for (const row of rawCounts) {
       // Get FIPS code and initialize.
-      const fips = row.county == "New York City" ? "36000" : row.fips;
+      const fips = row.county === "New York City" ? "36000" : row.fips;
       if (!(fips in this.data)) {
         this.data[fips] = new EpiViewEntry(row.county + " County", row.state);
       }

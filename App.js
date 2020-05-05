@@ -10,12 +10,13 @@ import EpiViewTable_COVID19_LosAngeles, { LOS_ANGELES } from "./struct/EpiViewTa
 export default class App extends React.Component {
   constructor(props) {
     super(props);
-    this.table_us = new EpiViewTable();
-    this.table_la = new EpiViewTable();
-    this.table = this.table_us;
+    this.table_blank = new EpiViewTable();
+    this.table_us = this.table_blank;
+    this.table_la = this.table_blank;
+    this.table = this.table_blank;
     this.state = {
       // UI state.
-      region: UNITED_STATES,  // currently used as initial region
+      region: UNITED_STATES,  // initial region
       polygons: [],
       recompute: false,
       pickingRefDate: false,
@@ -46,26 +47,6 @@ export default class App extends React.Component {
       refDate: refDate,
       date: new Date(this.table.maxDate),
     });
-  }
-
-  /**
-   * Returns the appropriate EpiViewTable for the region.
-   * 
-   * @param {!Object<string, number>} region A MapView Region.
-   * @return {!EpiViewTable} The corresponding EpiViewTable.
-   */
-  getTable(region) {
-    if (Math.abs(region.latitude - LOS_ANGELES.latitude) <
-          LOS_ANGELES.latitudeDelta / 2 &&
-        Math.abs(region.longitude - LOS_ANGELES.longitude) <
-          LOS_ANGELES.longitudeDelta / 2 &&
-        region.latitudeDelta <= LOS_ANGELES.latitudeDelta &&
-        region.longitudeDelta <= LOS_ANGELES.longitudeDelta) {
-      return this.table_la;
-    }
-    else {
-      return this.table_us;
-    }
   }
 
   render() {
@@ -159,7 +140,7 @@ export default class App extends React.Component {
                  initialRegion={this.state.region}>
           {this.state.polygons}
         </MapView>
-        {Object.keys(this.table.data).length == 0 ? (
+        {this.table == this.table_blank ? (
           <View style={styles.toolbar}>
             <ActivityIndicator size="large" color="#ee6e73" />
             <Text>Downloading data...</Text>

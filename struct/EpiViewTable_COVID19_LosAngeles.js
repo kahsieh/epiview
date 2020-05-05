@@ -26,7 +26,7 @@ import rawBounds from "../assets/local-data/la-county-neighborhoods-v6.json";
 
 /**
  * Los Angeles Neighborhood-level Case Count Data
- * Source: L.A. Times 
+ * Source: L.A. Times
  * Information: https://github.com/datadesk/california-coronavirus-data
  * Data: https://raw.githubusercontent.com/datadesk/california-coronavirus-data/master/latimes-place-totals.csv
  */
@@ -44,7 +44,7 @@ export const LOS_ANGELES = {
 
 /**
  * Holds a collection of EpiViewEntrys.
- * 
+ *
  * EpiViewTable_UnitedStates {
  *   "data": {
  *     key: EpiViewEntry,
@@ -101,7 +101,7 @@ export default class EpiViewTable_COVID19_LosAngeles extends EpiViewTable {
       const name = feature.properties.name;
       if (!(name in this.data)) {
         this.data[name] = new EpiViewEntry(feature.properties.NAME,
-                            "State " + feature.properties.STATEFP);
+                                           feature.properties.STATEFP);
       }
       // Populate data.
       switch (feature.geometry.type) {
