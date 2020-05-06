@@ -144,8 +144,8 @@ export default class EpiViewEntry {
       case "per case":
         dval = this.counts[dateStr].cases;
         break;
-      case "per 1000 population":
-        dval = this.population / 1e3;
+      case "per 100k population":
+        dval = this.population / 1e5;
         break;
       case "per sq. mi.":
         dval = this.area;

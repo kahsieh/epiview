@@ -14,15 +14,15 @@ import EpiViewTable from "./EpiViewTable.js";
  * Information: https://www.census.gov/programs-surveys/popest/data/data-sets.html
  * Data: https://www2.census.gov/programs-surveys/popest/datasets/2010-2019/counties/totals/co-est2019-alldata.csv
  */
-import rawPopulation from "../assets/county-data/co-est2019-alldata.json";
+import rawPopulation from "../assets/us-data/co-est2019-alldata.json";
 
 /**
- * United States County-level Boundary (and Area) Data
+ * United States County-level Boundary and Area Data
  * Source: U.S. Census Bureau (converted from SHP)
  * Information: https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.html
  * Data: https://www2.census.gov/geo/tiger/GENZ2018/shp/cb_2018_us_county_20m.zip
  */
-import rawBounds from "../assets/county-data/cb_2018_us_county_20m.json";
+import rawBounds from "../assets/us-data/cb_2018_us_county_20m.json";
 
 /**
  * United States County-level Case Count Data
@@ -95,7 +95,7 @@ export default class EpiViewTable_COVID19_UnitedStates extends EpiViewTable {
   }
 
   /**
-   * Populates the table with boundary data.
+   * Populates the table with boundary (and area) data.
    *
    * @param {!Object<string, *>} rawBounds Raw boundary data from the U.S.
    *     Census Bureau in GeoJSON format.

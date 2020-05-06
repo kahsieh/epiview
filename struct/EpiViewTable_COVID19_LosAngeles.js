@@ -14,7 +14,7 @@ import EpiViewTable from "./EpiViewTable.js";
  * Information: http://maps.latimes.com/
  * Data: http://maps.latimes.com/neighborhoods/population/total/neighborhood/list/
  */
-import rawPopulation from "../assets/local-data/la-county-population.json";
+import rawPopulation from "../assets/la-data/la-county-population.json";
 
 /**
  * Los Angeles Neighborhood-level Boundary Data
@@ -22,10 +22,18 @@ import rawPopulation from "../assets/local-data/la-county-population.json";
  * Information: http://boundaries.latimes.com/sets/
  * Data: http://s3-us-west-2.amazonaws.com/boundaries.latimes.com/archive/1.0/boundary-set/la-county-neighborhoods-v6.geojson
  */
-import rawBounds from "../assets/local-data/la-county-neighborhoods-v6.json";
+import rawBounds from "../assets/la-data/la-county-neighborhoods-v6.json";
 
 /**
- * Los Angeles Neighborhood-level Case Count Data
+ * Orange County Place-level Population, Boundary, and Area Data
+ * Source: O.C. Public Works
+ * Information: https://data-ocpw.opendata.arcgis.com/datasets/9afb06dcf6b24f7cbc6599e47ecc9f27_0
+ * Data: https://opendata.arcgis.com/datasets/9afb06dcf6b24f7cbc6599e47ecc9f27_0.geojson
+ */
+import rawOC from "../assets/la-data/orange-county.json";
+
+/**
+ * California Neighborhood-level Case Count Data
  * Source: L.A. Times
  * Information: https://github.com/datadesk/california-coronavirus-data
  * Data: https://raw.githubusercontent.com/datadesk/california-coronavirus-data/master/latimes-place-totals.csv
@@ -65,12 +73,13 @@ export default class EpiViewTable_COVID19_LosAngeles extends EpiViewTable {
   async compile() {
     this.addPopulation(rawPopulation);
     this.addBounds(rawBounds);
+    this.addOC(rawOC);
     await this.addCounts(rawCountsUrl);
     return this;
   }
 
   /**
-   * Populates the table with population data.
+   * Populates the table with population (and area) data.
    *
    * @param {!Array<Object<string, *>>} rawPopulation Raw population data from
    *     the L.A. Times.
@@ -78,9 +87,9 @@ export default class EpiViewTable_COVID19_LosAngeles extends EpiViewTable {
   addPopulation(rawPopulation) {
     for (const row of rawPopulation) {
       // Get name and initialize.
-      const name = row.name;
+      const name = row.name + ", Los Angeles County, California";
       if (!(name in this.data)) {
-        this.data[name] = new EpiViewEntry(name,
+        this.data[name] = new EpiViewEntry(row.name,
                                            "Los Angeles County, California");
       }
       // Populate data.
@@ -98,12 +107,44 @@ export default class EpiViewTable_COVID19_LosAngeles extends EpiViewTable {
   addBounds(rawBounds) {
     for (const feature of rawBounds.features) {
       // Get name and initialize.
-      const name = feature.properties.name;
+      const name = feature.properties.name + ", Los Angeles County, California";
       if (!(name in this.data)) {
         this.data[name] = new EpiViewEntry(feature.properties.NAME,
-                                           feature.properties.STATEFP);
+                                           "Los Angeles County, California");
       }
       // Populate data.
+      switch (feature.geometry.type) {
+        case "Polygon":
+          const bound = feature.geometry.coordinates;
+          this.data[name].bounds.push(bound[0].map(parseCoord));
+          break;
+        case "MultiPolygon":
+          for (const bound of feature.geometry.coordinates) {
+            this.data[name].bounds.push(bound[0].map(parseCoord));
+          }
+          break;
+      }
+    }
+  }
+
+  /**
+   * Populates the table with Orange County population, boundary, and area data.
+   *
+   * @param {!Object<string, *} rawOC Raw population, boundary, and area data
+   *     from O.C. Public Works.
+   */
+  addOC(rawOC) {
+    for (const feature of rawOC.features) {
+      // Get name and initialize.
+      const name = feature.properties.NAME10 + ", Orange County, California";
+      if (!(name in this.data)) {
+        this.data[name] = new EpiViewEntry(feature.properties.NAME10,
+                                           "Orange County, California");
+      }
+      // Populate data. Convert land area from square meters to square miles.
+      // A square mile is defined as exactly 2589988.110336 square meters.
+      this.data[name].area = feature.properties.ALAND10 / 2589988.110336;
+      this.data[name].population = feature.properties.SF1_G001_VD072;
       switch (feature.geometry.type) {
         case "Polygon":
           const bound = feature.geometry.coordinates;
@@ -128,14 +169,14 @@ export default class EpiViewTable_COVID19_LosAngeles extends EpiViewTable {
                                                .then(parseCsv);
     let minDate = "", maxDate = "";
     for (const row of rawCounts) {
-      if (row.county !== "Los Angeles") {
+      if (row.county !== "Los Angeles" && row.county !== "Orange") {
         continue;
       }
       // Get name and initialize.
-      const name = row.place;
+      const name = `${row.place}, ${row.county} County, California`;
       if (!(name in this.data)) {
-        this.data[name] = new EpiViewEntry(row.county,
-                                           "Los Angeles County, California");
+        this.data[name] = new EpiViewEntry(row.place,
+                                           `${row.county} County, California`);
       }
       // Populate data.
       if (!(row.date in this.data[name].counts)) {

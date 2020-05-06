@@ -16,14 +16,14 @@ export default class App extends React.Component {
     this.table = this.table_blank;
     this.state = {
       // UI state.
-      region: UNITED_STATES,  // initial region
+      region: LOS_ANGELES,  // initial region
       polygons: [],
       recompute: false,
       pickingRefDate: false,
       pickingDate: false,
       // User-defined function (UDF).
-      numerator: "daily new cases (U.S.)",
-      denominator: "per 1000 population",
+      numerator: "cases (L.A.)",
+      denominator: "per 100k population",
       mode: "on",
       refDate: new Date(),
       date: new Date(),
@@ -39,7 +39,7 @@ export default class App extends React.Component {
     const promise_la = new EpiViewTable_COVID19_LosAngeles().compile();
     this.table_us = await promise_us;
     this.table_la = await promise_la;
-    this.table = this.table_us;
+    this.table = this.table_la;
     const refDate = new Date(this.table.maxDate);
     refDate.setDate(refDate.getDate() - 7);
     this.setState({
@@ -88,7 +88,7 @@ export default class App extends React.Component {
                 this.setState({denominator: value, recompute: true})}>
         <Picker.Item label="Total" value="total" />
         <Picker.Item label="Per case" value="per case" />
-        <Picker.Item label="Per 1000 pop." value="per 1000 population" />
+        <Picker.Item label="Per 100k pop." value="per 100k population" />
         <Picker.Item label="Per sq. mi." value="per sq. mi." />
       </Picker>;
     const modePicker =
