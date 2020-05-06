@@ -143,8 +143,8 @@ export default class EpiViewTable_COVID19_LosAngeles extends EpiViewTable {
       }
       // Populate data. Convert land area from square meters to square miles.
       // A square mile is defined as exactly 2589988.110336 square meters.
-      this.data[name].area = feature.properties.ALAND10 / 2589988.110336;
-      this.data[name].population = feature.properties.SF1_G001_VD072;
+      this.data[name].area += feature.properties.ALAND10 / 2589988.110336;
+      this.data[name].population += +feature.properties.SF1_G001_VD072;
       switch (feature.geometry.type) {
         case "Polygon":
           const bound = feature.geometry.coordinates;

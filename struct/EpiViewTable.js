@@ -78,7 +78,7 @@ export default class EpiViewTable {
       fmax = 1;
     }
     const scale = x => 0.6 * (1 - Math.pow(Math.E, -50 * (x / fmax)));
-    const round = x => Math.round(x * 100 + Number.EPSILON) / 100;
+    const round = x => Math.round(x * 1000 + Number.EPSILON) / 1000;
 
     // Build the polygons array by looping through entries, skipping the ones
     // that are incomplete.
@@ -94,8 +94,9 @@ export default class EpiViewTable {
       const message =
         `${round(value)} ${udf.numerator.replace(/ \(.*\)/, "")} ` +
         `${udf.denominator} ${udf.mode} ` +
-        (udf.mode != "on" ? udf.refDate.toLocaleDateString() + "–" : "") +
-        udf.date.toLocaleDateString();
+        (udf.mode != "on" ? udf.refDate.toLocaleDateString() + "-" : "") +
+        udf.date.toLocaleDateString() +
+        ` [α=${value > 0 ? round(scale(value)) : -round(scale(-value))}]`;
       const color = value > 0 ? `rgba(255, 0, 0, ${round(scale(value))})`
                               : `rgba(0, 0, 255, ${round(scale(-value))})`;
 

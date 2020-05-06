@@ -164,7 +164,7 @@ export default class App extends React.Component {
               }
               {this.state.pickingRefDate && refDatePicker}
               {this.state.mode != "on" &&
-                <Text> – </Text>
+                <Text> - </Text>
               }
               <Button title={this.state.date.toLocaleDateString()}
                       onPress={() => this.setState({pickingDate: true})} />
