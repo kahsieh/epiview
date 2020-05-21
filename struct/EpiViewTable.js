@@ -77,7 +77,7 @@ export default class EpiViewTable {
     if (fmax === 0) {
       fmax = 1;
     }
-    const scale = x => 0.6 * (1 - Math.pow(Math.E, -50 * (x / fmax)));
+    const scale = x => 0.6 * (1 - Math.pow(Math.E, -10 * (x / fmax)));
     const round = x => Math.round(x * 1000 + Number.EPSILON) / 1000;
 
     // Build the polygons array by looping through entries, skipping the ones

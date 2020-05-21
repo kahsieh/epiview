@@ -137,7 +137,10 @@ export default class EpiViewTable_COVID19_LosAngeles extends EpiViewTable {
     for (const feature of rawOC.features) {
       // Get name and initialize.
       const name = feature.properties.NAME10 + ", Orange County, California";
-      if (!(name in this.data)) {
+      if (name in this.data) {
+        continue;  // this dataset has problematic repeats
+      }
+      else {
         this.data[name] = new EpiViewEntry(feature.properties.NAME10,
                                            "Orange County, California");
       }
