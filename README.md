@@ -2,6 +2,8 @@
 
 A mobile app for generating epidemic case maps, powered by React Native.
 
+**This project is no longer maintained as of June 2020.**
+
 Aiming to improve the ease of visualization for COVID-19 case data, EpiView
 allows the user to generate maps based on a customizable formula in terms of
 the available fields, including almanac and local-level data. For example, a
